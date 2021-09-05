@@ -17,7 +17,7 @@ all : $(BINARIES)
 $(RGB_LIBRARY): FORCE
 	$(MAKE) -C $(RGB_LIBDIR)
 
-GameMatrix : GameMatrix.o $(RGB_LIBRARY)
+GameMatrix.app : GameMatrix.o $(RGB_LIBRARY)
 	$(CXX) $< -o $@ $(LDFLAGS)
 
 # All the binaries that have the same name as the object file.q
