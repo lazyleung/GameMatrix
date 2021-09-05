@@ -260,16 +260,13 @@ static void DrawTetris(RGBMatrix *matrix)
 static int count = 0;
 void PlayTetris()
 {	
-	if (count++ < 5000)
-	{
-		IncreaseBaseRow();
-	}
-	else
+	if (count++ > 5000)
 	{
 		count = 0;
+		IncreaseBaseRow();
 	}
 
-	if (count % 10 == 0)
+	if (count % 100 == 0)
 	{
 		UpdateDefaultColor();
 	}
