@@ -45,7 +45,7 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 		float dot_y = sin(a * 2 * M_PI) * r;
 		matrix->SetPixel(center_x + dot_x, center_y + dot_y,
 						255, 0, 0);
-		usleep(1 * 500);  // wait a little to slow down things.
+		usleep(1 * 30);  // wait a little to slow down things.
 	}
 }
 
@@ -108,27 +108,27 @@ static void UpdateDefaultColor()
 {
 	if (_defaultColor->r < 255)
 	{
-		_defaultColor->r++;
+		_defaultColor->r+=5;
 	}
 	else if (_defaultColor->g < 255)
 	{
-		_defaultColor->g++;
+		_defaultColor->g+=5;
 	}
 	else if (_defaultColor->b < 255)
 	{
-		_defaultColor->b++;
+		_defaultColor->b+=5;
 	}
 	else if (_defaultColor->b > 0)
 	{
-		_defaultColor->b--;
+		_defaultColor->b-=5;
 	}
 	else if (_defaultColor->g > 0)
 	{
-		_defaultColor->g--;
+		_defaultColor->g-=5;
 	}
 	else if (_defaultColor->r > 0)
 	{
-		_defaultColor->r--;
+		_defaultColor->r-=5;
 	}
 }
 
@@ -148,7 +148,7 @@ void InitTetris()
 	TetrisBoard = (Row*)calloc(sizeof(Row), rows);
 	_baseRow = 0;
 
-	for (int y = 0; y < rows; y++)
+	for (int y = rows - 1; y >= 0; y--)
 	{
 		std::cout << "Base Row: " << GetBaseRow();
 		std::cout << "Row " << y << ":\t";
@@ -207,7 +207,7 @@ static void DrawTetris(RGBMatrix *matrix)
 				if (bStatus == None)
 				{
 					// Draw board background or piece
-					canvas->SetPixel(x, y, 184, 184, 184);
+					canvas->SetPixel(x, y, 0, 0, 0);
 					for (int piece = 0; piece < 4; piece++)
 					{
 						if (currentPiecePos[piece].x == x && currentPiecePos[piece].y == y)
@@ -220,10 +220,12 @@ static void DrawTetris(RGBMatrix *matrix)
 				}
 				else
 				{
-					if ((x - BOARD_X_OFFSET) % BLOCK_SIZE > 0  )
+					int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
+					int bY = (canvas->height() -y - BOARD_Y_OFFSET) % BLOCK_SIZE;
+					if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
 					{
 						// Draw Border
-						canvas->SetPixel(x, y, 0, 0, 0);
+						canvas->SetPixel(x, y, 20, 20, 20);
 					}
 					else
 					{
@@ -260,16 +262,13 @@ static void DrawTetris(RGBMatrix *matrix)
 static int count = 0;
 void PlayTetris()
 {	
-	if (count++ > 5000)
+	if (count++ > 100)
 	{
 		count = 0;
 		IncreaseBaseRow();
 	}
 
-	if (count % 100 == 0)
-	{
-		UpdateDefaultColor();
-	}
+	UpdateDefaultColor();
 }
 
 void CleanupTetris()
