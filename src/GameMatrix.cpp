@@ -50,6 +50,9 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 	}
 }
 
+// ========== Tetris Stuff ==========
+// ---------- Struct & Fields ----------
+
 enum BlockStatus
 {
 	None,
@@ -76,6 +79,10 @@ static PiecePos nextPiecePos[4];
 static Row *TetrisBoard;
 static int _baseRow;
 
+static Color* _defaultColor;
+
+// ---------- Accessors ----------
+
 static int GetBaseRow()
 {
 	return _baseRow;
@@ -93,7 +100,6 @@ static Row* GetRow(int rowNum)
 	return &TetrisBoard[row];
 }
 
-static Color* _defaultColor;
 static Color* GetDefaultColor()
 {
 	return new Color(_defaultColor->r, _defaultColor->g, _defaultColor->b);
@@ -134,6 +140,8 @@ static void IncreaseBaseRow()
 		_baseRow = 0;
 	}
 }
+
+// ---------- Game Functions ----------
 
 void InitTetris()
 {
@@ -252,7 +260,7 @@ static void DrawTetris(RGBMatrix *matrix)
 
 static int count = 0;
 void PlayTetris()
-{
+{	
 	if (count++ < 100)
 	{
 		IncreaseBaseRow();
@@ -266,6 +274,11 @@ void PlayTetris()
 	{
 		UpdateDefaultColor();
 	}
+}
+
+void CleanupTetris()
+{
+	free(TetrisBoard);
 }
 
 int main(int argc, char *argv[]) {
@@ -287,8 +300,8 @@ int main(int argc, char *argv[]) {
 	rtOptions.gpio_slowdown = 3;
 	rtOptions.drop_privileges = 0;
 
-	rtOptions.daemon = 0; // Set to 1 for production
-	rtOptions.do_gpio_init = false; // Set to true for debugging on pc
+	rtOptions.daemon = 0; 			// Set to 1 for production
+	rtOptions.do_gpio_init = true; 	// Set to false for debugging on pc
 
 	RGBMatrix *matrix = RGBMatrix::CreateFromOptions(defaults, rtOptions);
 	if (matrix == NULL)
@@ -305,12 +318,13 @@ int main(int argc, char *argv[]) {
 	DrawOnCanvas(matrix);
 
 	// Tetris Engine
-	while (true)
+	while (!interrupt_received)
 	{
+		PlayTetris();
 		DrawTetris(matrix);
 	}
 
-	// Finished. Shut down the RGB matrix.
+	CleanupTetris();
 	delete matrix;
 
 	return 0;
