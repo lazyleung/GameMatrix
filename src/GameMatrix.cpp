@@ -32,7 +32,7 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 	*/
 
 	FrameCanvas *canvas = matrix->CreateFrameCanvas();
-	canvas->Fill(0, 0, 255);
+	matrix->Fill(0, 0, 255);
 
 	int center_x = canvas->width() / 2;
 	int center_y = canvas->height() / 2;
@@ -43,9 +43,8 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 		return;
 		float dot_x = cos(a * 2 * M_PI) * r;
 		float dot_y = sin(a * 2 * M_PI) * r;
-		canvas->SetPixel(center_x + dot_x, center_y + dot_y,
+		matrix->SetPixel(center_x + dot_x, center_y + dot_y,
 						255, 0, 0);
-		matrix->SwapOnVSync(canvas);
 		usleep(1 * 500);  // wait a little to slow down things.
 	}
 }
@@ -261,7 +260,7 @@ static void DrawTetris(RGBMatrix *matrix)
 static int count = 0;
 void PlayTetris()
 {	
-	if (count++ < 100)
+	if (count++ < 5000)
 	{
 		IncreaseBaseRow();
 	}
