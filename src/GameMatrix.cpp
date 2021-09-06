@@ -158,6 +158,8 @@ static void UpdateDefaultColor()
 	{
 		_defaultColor->r-=5;
 	}
+
+	std::cout << "Default color is now: " << unsigned(_defaultColor->r) << "\t" << unsigned(_defaultColor->g) << "\t" << unsigned(_defaultColor->b) << std:endl;
 }
 
 static void ClearLines (int y)
@@ -310,7 +312,7 @@ static void DrawTetris(RGBMatrix *matrix)
 							else 
 							{
 								// Draw piece block
-								canvas->SetPixel(x, y, 20, 20, 20);
+								canvas->SetPixel(x, y, 100, 100, 100);
 							}
 							break;
 						}
@@ -330,6 +332,7 @@ static void DrawTetris(RGBMatrix *matrix)
 							case Clearing:
 								break;
 							case Default:
+								// TODO not working
 								c = _defaultColor;
 								break;
 							case Blue:
