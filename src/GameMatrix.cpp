@@ -78,6 +78,8 @@ struct PiecePos
 	int x, y;
 };
 
+// TODO change from buffer to linked list
+
 static PiecePos currentPiece[PIECE_SIZE];
 static PiecePos savedPiece[PIECE_SIZE];
 
@@ -298,7 +300,7 @@ static void DrawTetris(RGBMatrix *matrix)
 					canvas->SetPixel(x, y, 0, 0, 0);
 					for (int block = 0; block < PIECE_SIZE; block++)
 					{
-						if (currentPiece[block].x == x && currentPiece[block].y == y)
+						if (currentPiece[block].x == col && currentPiece[block].y == row)
 						{
 							// Draw piece block
 							canvas->SetPixel(x, y, 255, 25, 25);
