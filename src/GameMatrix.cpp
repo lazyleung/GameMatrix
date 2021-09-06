@@ -263,8 +263,8 @@ void InitTetris()
 	_currentPieceStatus = Default;
 	for (int block = 0; block < PIECE_SIZE; block++)
 	{
-		currentPiece[block].x = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
-		currentPiece[block].y = TETRIS_BOARD_COLS/2-1 + (pieceShapes[shape][block] / 2);
+		currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
+		currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
 	}
 }
 
@@ -406,21 +406,21 @@ void PlayTetris()
 		else 
 		{
 			if (_gravityTimer >= GRAVITY_TIMER)
-			{
+			{	
 				// Handle piece gravity
 				for (int block = 0; block < PIECE_SIZE; block++)
 				{
 					// Save current piece
 					savedPiece[block] = currentPiece[block];
 
-					currentPiece[block].y += 1;
+					currentPiece[block].y -= 1;
 				}
 				if(!checkPiecePos(currentPiece))
-				{
+				{	
 					// Piece is at bottom
 					for (int block = 0; block < PIECE_SIZE; block++)
 					{
-						GetRow(savedPiece[block].y)->cols[savedPiece[block].y] = _currentPieceStatus;
+						GetRow(savedPiece[block].y)->cols[savedPiece[block].x] = _currentPieceStatus;
 					}
 
 					// Insert base piece
@@ -429,8 +429,8 @@ void PlayTetris()
 					_currentPieceStatus = Default;
 					for (int block = 0; block < PIECE_SIZE; block++)
 					{
-						currentPiece[block].x = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
-						currentPiece[block].y = TETRIS_BOARD_COLS/2-1 + (pieceShapes[shape][block] / 2);
+						currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
+						currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
 					}
 				}
 
