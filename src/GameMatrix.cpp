@@ -499,39 +499,45 @@ void PlayTetris()
 				}
 				if(!checkPiecePos(currentPiece))
 				{	
-					// Piece is at bottom
-					for (int block = 0; block < PIECE_SIZE; block++)
+					if(_bottomCount++ >= GRAVITY_BOTTOM_TARGET)
 					{
-						TetrisBoard[savedPiece[block].y].cols[savedPiece[block].x] = _currentPieceStatus;
-					}
-
-					addPiece();
-				}
-
-				_gravityCount = 0;
-
-				if(_bottomCount++ >= GRAVITY_BOTTOM_TARGET)
-				{
-					// Check if lines need to be cleared
-					for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
-					{
-						for (int c = 0; c < TETRIS_BOARD_COLS; c++)
+						// Piece is at bottom
+						for (int block = 0; block < PIECE_SIZE; block++)
 						{
-							if (TetrisBoard[r].cols[c] == None)
-							{
-								// Gap found in line
-								break;
-							}
-							if (c == TETRIS_BOARD_COLS - 1)
-							{
-								// Line marked to be cleared
-								_tState = ClearAnimation;
-								TetrisBoard[r].toClear = true;
-							}
+							TetrisBoard[savedPiece[block].y].cols[savedPiece[block].x] = _currentPieceStatus;
+						}
+
+						addPiece();
+
+						_bottomCount = 0;
+					}
+					else
+					{
+						// Reset piece
+						for (int block = 0; block < PIECE_SIZE; block++)
+						{
+							currentPiece[block] = savedPiece[block];
 						}
 					}
+				}
 
-					_bottomCount = 0;
+				// Check if lines need to be cleared
+				for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
+				{
+					for (int c = 0; c < TETRIS_BOARD_COLS; c++)
+					{
+						if (TetrisBoard[r].cols[c] == None)
+						{
+							// Gap found in line
+							break;
+						}
+						if (c == TETRIS_BOARD_COLS - 1)
+						{
+							// Line marked to be cleared
+							_tState = ClearAnimation;
+							TetrisBoard[r].toClear = true;
+						}
+					}
 				}
 			}
 			break;
