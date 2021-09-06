@@ -26,7 +26,7 @@ using rgb_matrix::Canvas;
 
 #define LINE_CLEAR_TARGET 30
 #define GRAVITY_UPDATE_TARGET 60
-#define GRAVITY_BOTTOM_TARGET 2
+#define GRAVITY_BOTTOM_TARGET 1
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
