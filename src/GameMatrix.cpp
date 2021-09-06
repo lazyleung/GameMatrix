@@ -165,6 +165,7 @@ static void UpdateDefaultColor()
 
 static void ClearLines (int y)
 {
+	std::cout << "Lines cleared: " << y << std::endl;
 	_isLineClearing = true;
 	_linesToClear = y;
 	for (int i = 0; i < y; i++)
@@ -241,11 +242,11 @@ void InitTetris()
 	std::cout << "Base Row: " << GetBaseRow() << std::endl;
 	for (int y = rows - 1; y >= 0; y--)
 	{
-		
 		std::cout << "Row " << y << ":\t";
+		Row *r = GetRow(y);
 		for (int x = 0; x < TETRIS_BOARD_ROWS; x++)
 		{
-			std::cout << (GetRow(y)->cols[x] != None ? "1 " : "0 ");
+			std::cout << (r->cols[x] != None ? "1 " : "0 ");
 		}
 		std::cout << std::endl;
 	}
@@ -440,24 +441,25 @@ void PlayTetris()
 			
 
 			// Check if lines need to be cleared
-			int r = 0;
-			for (bool isClear = true; r < TETRIS_BOARD_ROWS && isClear; r++)
+			int linesToClear = 0;
+			for (bool isClear = true; linesToClear < TETRIS_BOARD_ROWS && isClear;)
 			{
-				Row *row = GetRow(r);
+				Row *r = GetRow(linesToClear);
 				for (int c = 0; c < TETRIS_BOARD_COLS; c++)
 				{
-					if (row->cols[c] == None)
+					if (r->cols[c] == None)
 					{
 						isClear = false;
 						break;
 					}
 				}
+				r++;
 			}
 
-			if (r > 0)
+			if (linesToClear > 0)
 			{
 				// Enter clearing stage
-				ClearLines(r);
+				ClearLines(linesToClear);
 			}
 		}
 	}
