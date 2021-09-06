@@ -238,30 +238,14 @@ void InitTetris()
 	TetrisBoard = (Row*)calloc(sizeof(Row), rows);
 	_baseRow = 0;
 
+	std::cout << "Base Row: " << GetBaseRow() << std::endl;
 	for (int y = rows - 1; y >= 0; y--)
 	{
-		std::cout << "Base Row: " << GetBaseRow();
+		
 		std::cout << "Row " << y << ":\t";
 		for (int x = 0; x < TETRIS_BOARD_ROWS; x++)
 		{
-			Row *r = GetRow(y);
-			if (x == 3 && y == 7)
-			{
-				r->cols[x] = Blue;
-			}
-			else if (x == 7 && y == 3)
-			{
-				r->cols[x] = Pink;
-			}
-			else if (x == 5 && y == 5)
-			{
-				r->cols[x] = Default;
-			}
-			else
-			{
-				r->cols[x] = None;
-			}
-			std::cout << (r->cols[x] != None ? "1 " : "0 ");
+			std::cout << (GetRow(y)->cols[x] != None ? "1 " : "0 ");
 		}
 		std::cout << std::endl;
 	}
@@ -269,6 +253,16 @@ void InitTetris()
 	_defaultColor = new Color(0, 0, 0);
 
 	// TODO Need to zero currentPiece or savedPiece?
+
+	// Insert base piece
+	int shape = rand() % 7;
+	// TODO add random color status
+	_currentPieceStatus = Default;
+	for (int block = 0; block < PIECE_SIZE; block++)
+	{
+		currentPiece[block].x = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
+		currentPiece[block].y = TETRIS_BOARD_COLS/2-1 + (pieceShapes[shape][block] / 2);
+	}
 }
 
 static void DrawTetris(RGBMatrix *matrix)
