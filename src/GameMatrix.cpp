@@ -9,6 +9,7 @@
 #include <iostream>
 #include <signal.h>
 #include <stdlib.h>
+#include <termio.h>
 
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
@@ -30,6 +31,8 @@ volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
   interrupt_received = true;
 }
+
+static bool _running;
 
 static void DrawOnCanvas(RGBMatrix *matrix) {
 	/*
@@ -99,23 +102,28 @@ int pieceShapes[7][4] =
 };
 
 static Row * TetrisBoard;
-
 static Color * _defaultColor;
 
-static bool _rotate = false;
-
-enum TetrisState 
+enum tetrisState 
 {
 	Normal,
 	ClearAnimation,
 	Clearing
 };
-static TetrisState _tState;
+static tetrisState _tState;
+
+enum rotateState
+{
+	NoRotate,
+	Clockwise,
+	CounterClockwise
+};
+static rotateState _rotateState;
 
 static int _clearTimer;
 static int _gravityTimer;
 
-// ---------- Accessors ----------
+// ---------- Helpers ----------
 
 static void UpdateDefaultColor()
 {
@@ -157,8 +165,6 @@ static void ClearLines ()
 		}
 	}
 }
-
-// ---------- Helpers ----------
 
 // Check that all blocks of piece are in valid locations
 bool checkPiecePos(PiecePos *piece)
@@ -203,6 +209,37 @@ static void addPiece()
 		currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
 		currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
 	}
+}
+
+static char getch() {
+	static bool is_terminal = isatty(STDIN_FILENO);
+
+	struct termios old;
+	if (is_terminal) {
+		if (tcgetattr(0, &old) < 0)
+		perror("tcsetattr()");
+
+		// Set to unbuffered mode
+		struct termios no_echo = old;
+		no_echo.c_lflag &= ~ICANON;
+		no_echo.c_lflag &= ~ECHO;
+		no_echo.c_cc[VMIN] = 1;
+		no_echo.c_cc[VTIME] = 0;
+		if (tcsetattr(0, TCSANOW, &no_echo) < 0)
+		perror("tcsetattr ICANON");
+	}
+
+	char buf = 0;
+	if (read(STDIN_FILENO, &buf, 1) < 0)
+		perror ("read()");
+
+	if (is_terminal) {
+		// Back to original terminal settings.
+		if (tcsetattr(0, TCSADRAIN, &old) < 0)
+		perror ("tcsetattr ~ICANON");
+	}
+
+	return buf;
 }
 
 // ---------- Game Functions ----------
@@ -336,20 +373,61 @@ void PlayTetris()
 	switch (_tState)
 	{
 		case Normal:
+		{
+			// Capture Input
+			const char c = tolower(getch());
+			int xShift = 0;
+			int yshift = 0;
+			_rotateState = NoRotate;
+			switch (c)
+			{
+				case 'w': // Up
+				case 'k':   
+					// TODO drop
+					break;
+				case 's': // Down
+				case 'j': 
+					yshift--;
+					break;
+				case 'a': // Left
+				case 'h':  
+					xShift--;
+					break;
+				case 'd': // Right
+				case 'l':
+					xShift++;
+					break;
+				case 'q': // Rotate
+					_rotateState = CounterClockwise;
+					break;
+				case 'e': // Rotate
+					_rotateState = Clockwise;
+					break;
+
+				// Exit program
+				case 0x1B:           // Escape
+				case 0x04:           // End of file
+				case 0x00:           // Other issue from getch()
+					_running = false;
+					break;
+			}
+
 			// Handle move
 			for (int block = 0; block < PIECE_SIZE; block++)
 			{
 				// Save current piece
 				savedPiece[block] = currentPiece[block];
 
+				
+
 				// TODO handle move
-				// currentPiece[block].x += xMovement
-				// currentPiece[block].y += yMovement
+				currentPiece[block].x += xShift;
+				currentPiece[block].y += yshift;
 			}
 			checkCurrentPiecePos();
 
 			// Handle rotate
-			if (_rotate)
+			if (_rotateState != NoRotate)
 			{
 				PiecePos rotationPos = currentPiece[1];
 				for (int block = 0; block < PIECE_SIZE; block++)
@@ -357,16 +435,31 @@ void PlayTetris()
 					// Save current piece
 					savedPiece[block] = currentPiece[block];
 
-					// Transpose y distance from rotationPos to x axis
 					int x = savedPiece[block].y - rotationPos.y;
-					currentPiece[block].x = rotationPos.x - x;
-
-					// Transpose x distance from rotationPos to y axis
 					int y = savedPiece[block].x - rotationPos.x;
-					currentPiece[block].y = rotationPos.y + y;
+
+					switch (_rotateState)
+					{
+						case Clockwise:
+							// Transpose y distance from rotationPos to x axis
+							currentPiece[block].x = rotationPos.x + x;
+
+							// Transpose x distance from rotationPos to -y axis
+							currentPiece[block].y = rotationPos.y - y;
+							break;
+						case CounterClockwise:
+							// Transpose y distance from rotationPos to -x axis
+							currentPiece[block].x = rotationPos.x - x;
+
+							// Transpose x distance from rotationPos to y axis
+							currentPiece[block].y = rotationPos.y + y;
+							break;
+						case NoRotate:
+							break;
+					}
 				}
 				checkCurrentPiecePos();
-				_rotate = false;
+				_rotateState = NoRotate;
 			}
 
 			if (_gravityTimer >= GRAVITY_TIMER)
@@ -404,6 +497,7 @@ void PlayTetris()
 				{
 					if (TetrisBoard[r].cols[c] == None)
 					{
+						// Gap found in line
 						break;
 					}
 					if (c == TETRIS_BOARD_COLS - 1)
@@ -415,6 +509,7 @@ void PlayTetris()
 				}
 			}
 			break;
+		}
 		case ClearAnimation:
 			if (_clearTimer >= LINE_CLEAR_TIMER)
 			{
@@ -473,11 +568,13 @@ int main(int argc, char *argv[]) {
 	signal(SIGTERM, InterruptHandler);
 	signal(SIGINT, InterruptHandler);
 
+	_running = true;
+
 	// StartUp Animation
 	DrawOnCanvas(matrix);
 
 	// Tetris Engine
-	while (!interrupt_received)
+	while (!interrupt_received && _running)
 	{
 		PlayTetris();
 		DrawTetris(matrix);
