@@ -256,7 +256,7 @@ static void DrawTetris(RGBMatrix *matrix)
 				return;
 
 			if ((x < BOARD_X_OFFSET || x > BOARD_X_OFFSET + (BLOCK_SIZE * TETRIS_BOARD_COLS)) ||
-				(y > canvas->height() - BOARD_Y_OFFSET + 1 || y < canvas->height() - BOARD_Y_OFFSET + 1- (BLOCK_SIZE * TETRIS_BOARD_ROWS)))
+				(y > canvas->height() - BOARD_Y_OFFSET - 1 || y < canvas->height() - BOARD_Y_OFFSET - 1 - (BLOCK_SIZE * TETRIS_BOARD_ROWS)))
 			{
 				// Draw border background
 				canvas->SetPixel(x, y, 108, 64, 173);
@@ -265,7 +265,7 @@ static void DrawTetris(RGBMatrix *matrix)
 			{
 				// Draw tetris board
 				int col = (x - BOARD_X_OFFSET) / BLOCK_SIZE;
-				int row = (canvas->height() - y - BOARD_Y_OFFSET + 1) / BLOCK_SIZE;
+				int row = (canvas->height() - y - BOARD_Y_OFFSET - 1) / BLOCK_SIZE;
 
 				Row *tRow = GetRow(row);
 				BlockStatus bStatus = tRow->cols[col];
@@ -279,7 +279,7 @@ static void DrawTetris(RGBMatrix *matrix)
 						if (currentPiece[block].x == col && currentPiece[block].y == row)
 						{
 							int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
-							int bY = (canvas->height() -y - BOARD_Y_OFFSET + 1) % BLOCK_SIZE;
+							int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
 							if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
 							{
 								// Draw piece block border
@@ -298,7 +298,7 @@ static void DrawTetris(RGBMatrix *matrix)
 				{
 					// Draw board block
 					int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
-					int bY = (canvas->height() -y - BOARD_Y_OFFSET + 1) % BLOCK_SIZE;
+					int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
 					if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
 					{
 						// Draw block border
