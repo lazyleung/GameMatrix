@@ -110,7 +110,7 @@ enum TetrisState
 	ClearAnimation,
 	Clearing
 };
-static TetrisState _tState = Normal;
+static TetrisState _tState;
 
 static int _clearTimer = 0;
 static int _gravityTimer = 0;
@@ -224,6 +224,7 @@ void InitTetris()
 		std::cout << std::endl;
 	}
 
+	_tState = Normal;
 	_defaultColor = new Color(0, 0, 0);
 
 	addPiece();
@@ -332,7 +333,6 @@ static void DrawTetris(RGBMatrix *matrix)
 
 void PlayTetris()
 {	
-
 	switch (_tState)
 	{
 		case Normal:
@@ -430,8 +430,6 @@ void PlayTetris()
 			ClearLines();
 			break;
 	}
-	
-	
 }
 
 void CleanupTetris()
