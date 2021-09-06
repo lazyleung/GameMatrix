@@ -1,3 +1,3 @@
-[submodule "external/rpi-rgb-led-matrix"]
-	path = external/rpi-rgb-led-matrix
+[submodule "rpi-rgb-led-matrix"]
+	path = rpi-rgb-led-matrix
 	url = https://github.com/lazyleung/rpi-rgb-led-matrix.git
