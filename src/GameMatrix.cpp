@@ -339,21 +339,29 @@ static void DrawTetris(RGBMatrix *matrix)
 						switch(TetrisBoard[row].cols[col])
 						{
 							case Default:
+							{
 								c = _defaultColor;
 								break;
+							}
 							case Blue:
+							{
 								c->r = 38;
 								c->g = 48;
 								c->b = 195;
 								break;
+							}
 							case Pink:
+							{
 								c->r = 210;
 								c->g = 42;
 								c->b = 171;
 								break;
+							}
 							default:
 							case None:
+							{
 								break;
+							}
 						}
 						canvas->SetPixel(x, y, c->r, c->g, c->b);
 					}
@@ -382,34 +390,47 @@ void PlayTetris()
 			switch (c)
 			{
 				case 'w': // Up
-				case 'k':   
+				case 'k':
+				{
 					// TODO drop
 					break;
+				}
 				case 's': // Down
-				case 'j': 
+				case 'j':
+				{
 					yshift--;
 					break;
+				}
 				case 'a': // Left
-				case 'h':  
+				case 'h':
+				{
 					xShift--;
 					break;
+				}
 				case 'd': // Right
 				case 'l':
+				{
 					xShift++;
 					break;
+				}
 				case 'q': // Rotate
+				{
 					_rotateState = CounterClockwise;
 					break;
+				}
 				case 'e': // Rotate
+				{
 					_rotateState = Clockwise;
 					break;
-
+				}
 				// Exit program
 				case 0x1B:           // Escape
 				case 0x04:           // End of file
 				case 0x00:           // Other issue from getch()
+				{
 					_running = false;
 					break;
+				}
 			}
 
 			// Handle move
@@ -441,21 +462,27 @@ void PlayTetris()
 					switch (_rotateState)
 					{
 						case Clockwise:
+						{
 							// Transpose y distance from rotationPos to x axis
 							currentPiece[block].x = rotationPos.x + x;
 
 							// Transpose x distance from rotationPos to -y axis
 							currentPiece[block].y = rotationPos.y - y;
 							break;
+						}
 						case CounterClockwise:
+						{
 							// Transpose y distance from rotationPos to -x axis
 							currentPiece[block].x = rotationPos.x - x;
 
 							// Transpose x distance from rotationPos to y axis
 							currentPiece[block].y = rotationPos.y + y;
 							break;
+						}
 						case NoRotate:
+						{
 							break;
+						}
 					}
 				}
 				checkCurrentPiecePos();
@@ -511,6 +538,7 @@ void PlayTetris()
 			break;
 		}
 		case ClearAnimation:
+		{
 			if (_clearTimer >= LINE_CLEAR_TIMER)
 			{
 				// Mark the end of the line clearing stage
@@ -523,10 +551,13 @@ void PlayTetris()
 				_clearTimer++;
 			}
 			break;
+		}
 		case Clearing:
+		{
 			ClearLines();
 			_tState = Normal;
 			break;
+		}
 	}
 }
 
