@@ -539,6 +539,8 @@ void PlayTetris()
 						}
 					}
 				}
+
+				_gravityCount = 0;
 			}
 			break;
 		}
