@@ -229,7 +229,7 @@ static char getch() {
 	struct termios old;
 	if (is_terminal) {
 		if (tcgetattr(0, &old) < 0)
-		perror("tcsetattr()");
+			perror("tcsetattr()");
 
 		// Set to unbuffered mode
 		struct termios no_echo = old;
@@ -238,7 +238,7 @@ static char getch() {
 		no_echo.c_cc[VMIN] = 1;
 		no_echo.c_cc[VTIME] = 0;
 		if (tcsetattr(0, TCSANOW, &no_echo) < 0)
-		perror("tcsetattr ICANON");
+			perror("tcsetattr ICANON");
 	}
 
 	char buf = 0;
@@ -592,7 +592,7 @@ int main(int argc, char *argv[]) {
 	defaults.pixel_mapper_config = "U-Mapper";
 
 	defaults.limit_refresh_rate_hz = 120;
-	defaults.show_refresh_rate = true;
+	defaults.show_refresh_rate = false;
 
 	rgb_matrix::RuntimeOptions rtOptions;
 	rtOptions.gpio_slowdown = 3;
