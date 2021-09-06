@@ -17,8 +17,13 @@ using rgb_matrix::Canvas;
 #define TETRIS_BOARD_ROWS 12
 #define TETRIS_BOARD_COLS 10
 #define BLOCK_SIZE 5
+#define PIECE_SIZE 4
 #define BOARD_X_OFFSET 7
 #define BOARD_Y_OFFSET 4
+
+
+#define LINE_CLEAR_TIMER 10
+#define GRAVITY_TIMER 5
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -55,6 +60,7 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 enum BlockStatus
 {
 	None,
+	Clearing,
 	Default,
 	Blue,
 	Pink
@@ -72,13 +78,36 @@ struct PiecePos
 	int x, y;
 };
 
-static PiecePos currentPiecePos[4];
-static PiecePos nextPiecePos[4];
+static PiecePos currentPiece[PIECE_SIZE];
+static PiecePos savedPiece[PIECE_SIZE];
 
-static Row *TetrisBoard;
+static BlockStatus _currentPieceStatus;
+
+// Point of rotation is [?][1]
+// Based on following mapping:
+// 1 2 3 4
+//   5 6 7
+int pieceShapes[7][4] =
+{
+    1,3,5,7, // I
+    2,4,5,7, // Z
+    3,5,4,6, // S
+    3,5,4,7, // T
+    2,3,5,7, // L
+    3,5,7,6, // J
+    2,3,4,5, // O
+};
+
+static Row * TetrisBoard;
 static int _baseRow;
 
-static Color* _defaultColor;
+static Color * _defaultColor;
+
+static bool _rotate = false;
+
+static bool _isLineClearing = false;
+static int _linesToClear = 0;
+static int _clearTimer = 0;
 
 // ---------- Accessors ----------
 
@@ -132,11 +161,70 @@ static void UpdateDefaultColor()
 	}
 }
 
+static void ClearLines (int y)
+{
+	_isLineClearing = true;
+	_linesToClear = y;
+	for (int i = 0; i < y; i++)
+	{
+		Row *r = GetRow(i);
+		for (int j = 0; j < TETRIS_BOARD_COLS; j++)
+		{
+			r->cols[j] = Clearing;
+		}
+	}
+}
+
 static void IncreaseBaseRow()
 {
-	if (++_baseRow >= TETRIS_BOARD_ROWS)
+	if (!_isLineClearing)
 	{
-		_baseRow = 0;
+		for (int i = 0; i < _linesToClear; i++)
+		{
+			Row *r = GetRow(i);
+			for (int j = 0; j < TETRIS_BOARD_COLS; j++)
+			{
+				r->cols[j] = None;
+			}
+		}
+
+		_baseRow = (_baseRow + _linesToClear) % TETRIS_BOARD_ROWS;
+
+		_linesToClear = 0;
+	}
+}
+
+// ---------- Helpers ----------
+
+// Check that all blocks of piece are in valid locations
+bool checkPiecePos(PiecePos *piece)
+{
+	for (int block = 0; block < PIECE_SIZE; block++)
+	{
+		// Within board
+		if (piece[block].x < 0 || piece[block].x >= TETRIS_BOARD_COLS ||
+			piece[block].y < 0 || piece[block].y >= TETRIS_BOARD_ROWS)
+		{
+			return false;
+		}
+		// Not on board block
+		else if (GetRow(piece[block].y)->cols[piece[block].x] != None)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+// Reset next piece to current if pos invalid
+void checkCurrentPiecePos()
+{
+	if(!checkPiecePos(currentPiece))
+	{
+		for (int block = 0; block < PIECE_SIZE; block++)
+		{
+			currentPiece[block] = savedPiece[block];
+		}
 	}
 }
 
@@ -178,7 +266,7 @@ void InitTetris()
 
 	_defaultColor = new Color(0, 0, 0);
 
-	// TODO Need to zero currentPiecePos or nextPiecePos?
+	// TODO Need to zero currentPiece or savedPiece?
 }
 
 static void DrawTetris(RGBMatrix *matrix)
@@ -189,6 +277,9 @@ static void DrawTetris(RGBMatrix *matrix)
 	{
 		for (int y = 0; y < canvas->height(); y++)
 		{
+			if (interrupt_received)
+				return;
+
 			if ((x < BOARD_X_OFFSET || x > BOARD_X_OFFSET + (BLOCK_SIZE * TETRIS_BOARD_COLS)) ||
 				(y > canvas->height() - BOARD_Y_OFFSET || y < canvas->height() - BOARD_Y_OFFSET - (BLOCK_SIZE * TETRIS_BOARD_ROWS)))
 			{
@@ -206,13 +297,13 @@ static void DrawTetris(RGBMatrix *matrix)
 
 				if (bStatus == None)
 				{
-					// Draw board background or piece
+					// Draw board background or piece block
 					canvas->SetPixel(x, y, 0, 0, 0);
-					for (int piece = 0; piece < 4; piece++)
+					for (int block = 0; block < PIECE_SIZE; block++)
 					{
-						if (currentPiecePos[piece].x == x && currentPiecePos[piece].y == y)
+						if (currentPiece[block].x == x && currentPiece[block].y == y)
 						{
-							// Draw piece color
+							// Draw piece block
 							canvas->SetPixel(x, y, 255, 25, 25);
 							break;
 						}
@@ -220,31 +311,42 @@ static void DrawTetris(RGBMatrix *matrix)
 				}
 				else
 				{
+					// Draw board block
 					int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
 					int bY = (canvas->height() -y - BOARD_Y_OFFSET) % BLOCK_SIZE;
 					if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
 					{
-						// Draw Border
-						canvas->SetPixel(x, y, 20, 20, 20);
+						// Draw block border
+						if (bStatus == Clearing)
+						{
+							// TODO set fade
+							canvas->SetPixel(x, y, 255, 255, 255);
+						}
+						else 
+						{
+							canvas->SetPixel(x, y, 20, 20, 20);
+						}
 					}
 					else
 					{
-						// Draw Color
+						// Draw block color
 						Color *c = new Color(255, 255, 255);
 						switch(bStatus)
 						{
+							case Clearing:
+								break;
 							case Default:
 								c = GetDefaultColor();
 								break;
 							case Blue:
-								c->r = 201;
-								c->g = 255;
-								c->b = 229;
+								c->r = 38;
+								c->g = 48;
+								c->b = 195;
 								break;
 							case Pink:
-								c->r = 255;
-								c->g = 51;
-								c->b = 255;
+								c->r = 210;
+								c->g = 42;
+								c->b = 171;
 								break;
 							default:
 							case None:
@@ -259,13 +361,109 @@ static void DrawTetris(RGBMatrix *matrix)
 	matrix->SwapOnVSync(canvas, 2U);
 }
 
-static int count = 0;
 void PlayTetris()
 {	
-	if (count++ > 100)
+	// Check if in clearing stage
+	if(!_isLineClearing)
 	{
-		count = 0;
-		IncreaseBaseRow();
+		// Handle move
+		for (int block = 0; block < PIECE_SIZE; block++)
+		{
+			// Save current piece
+			savedPiece[block] = currentPiece[block];
+
+			// TODO handle move
+			// currentPiece[block].x += xMovement
+			// currentPiece[block].y += yMovement
+		}
+		checkCurrentPiecePos();
+
+		// Handle rotate
+		if (_rotate)
+		{
+			PiecePos rotationPos = currentPiece[1];
+			for (int block = 0; block < PIECE_SIZE; block++)
+			{
+				// Save current piece
+				savedPiece[block] = currentPiece[block];
+
+				// Transpose y distance from rotationPos to x axis
+				int x = savedPiece[block].y - rotationPos.y;
+				currentPiece[block].x = rotationPos.x - x;
+
+				// Transpose x distance from rotationPos to y axis
+				int y = savedPiece[block].x - rotationPos.x;
+				currentPiece[block].y = rotationPos.y + y;
+			}
+			checkCurrentPiecePos();
+			_rotate = false;
+		}
+
+		if (_linesToClear != 0)
+		{
+			// Finished clearing stage
+			IncreaseBaseRow();
+		}
+		else 
+		{
+			// Handle piece gravity
+			for (int block = 0; block < PIECE_SIZE; block++)
+			{
+				// Save current piece
+				savedPiece[block] = currentPiece[block];
+
+				currentPiece[block].y += 1;
+			}
+			if(!checkPiecePos(currentPiece))
+			{
+				// Piece is at bottom
+				for (int block = 0; block < PIECE_SIZE; block++)
+				{
+					GetRow(savedPiece[block].y)->cols[savedPiece[block].y] = _currentPieceStatus;
+				}
+
+				// Insert base piece
+				int shape = rand() % 7;
+				// TODO add random color status
+				_currentPieceStatus = Default;
+				for (int block = 0; block < PIECE_SIZE; block++)
+				{
+					currentPiece[block].x = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
+					currentPiece[block].y = TETRIS_BOARD_COLS/2-1 + (pieceShapes[shape][block] / 2);
+				}
+			}
+
+			// Check if lines need to be cleared
+			int r = 0;
+			for (bool isClear = true; r < TETRIS_BOARD_ROWS && isClear; r++)
+			{
+				Row *row = GetRow(r);
+				for (int c = 0; c < TETRIS_BOARD_COLS; c++)
+				{
+					if (row->cols[c] == None)
+					{
+						isClear = false;
+						break;
+					}
+				}
+			}
+
+			if (r > 0)
+			{
+				// Enter clearing stage
+				ClearLines(r);
+			}
+		}
+	}
+	else if (_clearTimer >= LINE_CLEAR_TIMER)
+	{
+		// Mark the end of the line clearing stage
+		_isLineClearing = 0;
+	}
+	else
+	{
+		// Line clearing stage
+		_clearTimer++;
 	}
 
 	UpdateDefaultColor();
