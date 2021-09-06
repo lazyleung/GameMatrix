@@ -14,8 +14,10 @@ using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
 
-#define TETRIS_BOARD_ROWS 12
+// Tetris width always 10 wide
 #define TETRIS_BOARD_COLS 10
+#define TETRIS_BOARD_ROWS 12
+// How many pixels per Tetris block
 #define BLOCK_SIZE 5
 #define PIECE_SIZE 4
 #define BOARD_X_OFFSET 7
@@ -59,17 +61,14 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 enum BlockStatus
 {
 	None,
-	Clearing,
 	Default,
 	Blue,
 	Pink
 };
 
-// Tetis Block size = 5
-// 5 x 10 wide, 5 x 12 Tall
-// Tetris width always 10 wide
 struct Row {
 	BlockStatus cols[TETRIS_BOARD_ROWS];
+	bool 		toClear;
 };
 
 struct PiecePos
@@ -99,75 +98,66 @@ int pieceShapes[7][4] =
     2,3,4,5, // O
 };
 
-static Row * TetrisBoard;
-static int _baseRow;
+static Row ** TetrisBoard;
 
 static Color * _defaultColor;
 
 static bool _rotate = false;
 
-static bool _isLineClearing = false;
-static int _linesToClear = 0;
-static int _clearTimer = 0;
+enum TetrisState 
+{
+	Normal,
+	ClearAnimation,
+	Clearing
+};
+static TetrisState _tState = Normal;
 
+static int _clearTimer = 0;
 static int _gravityTimer = 0;
 
 // ---------- Accessors ----------
-
-static int GetBaseRow()
-{
-	return _baseRow;
-}
-
-static Row* GetRow(int rowNum)
-{
-	int row = _baseRow + rowNum;
-
-	if (row >= TETRIS_BOARD_ROWS)
-	{
-		row -= TETRIS_BOARD_ROWS;
-	}
-
-	return &TetrisBoard[row];
-}
 
 static void UpdateDefaultColor()
 {
 	_defaultColor->g++;
 }
 
-static void ClearLines (int y)
+static void copyLine(int src, int dest)
 {
-	std::cout << "Lines cleared: " << y << std::endl;
-	_isLineClearing = true;
-	_linesToClear = y;
-	for (int i = 0; i < y; i++)
+	for (int i = 0; i < TETRIS_BOARD_COLS; i++)
 	{
-		Row *r = GetRow(i);
-		for (int j = 0; j < TETRIS_BOARD_COLS; j++)
-		{
-			r->cols[j] = Clearing;
-		}
+		TetrisBoard[dest]->cols[i] = TetrisBoard[src]->cols[i];
 	}
+	TetrisBoard[dest]->toClear = false;
 }
 
-static void IncreaseBaseRow()
+static void ClearLines ()
 {
-	if (!_isLineClearing)
+	int lowestValidRow = 0;
+	for (int i = 0; i < TETRIS_BOARD_ROWS; i++)
 	{
-		for (int i = 0; i < _linesToClear; i++)
+		if (!TetrisBoard[i]->toClear)
 		{
-			Row *r = GetRow(i);
-			for (int j = 0; j < TETRIS_BOARD_COLS; j++)
+			// Move valid row to lowest row
+			if (lowestValidRow < i)
 			{
-				r->cols[j] = None;
+				copyLine(i, lowestValidRow);
 			}
+			lowestValidRow++;
 		}
-
-		_baseRow = (_baseRow + _linesToClear) % TETRIS_BOARD_ROWS;
-
-		_linesToClear = 0;
 	}
+
+	// Zero out rest of rows
+	for (;lowestValidRow < TETRIS_BOARD_ROWS; lowestValidRow++)
+	{
+		for (int i = 0; i < TETRIS_BOARD_COLS; i++)
+		{
+			TetrisBoard[lowestValidRow]->cols[i] = None;
+			TetrisBoard[lowestValidRow]->toClear = false;
+		}
+	}
+
+	_tState = Normal;
 }
 
 // ---------- Helpers ----------
@@ -184,7 +174,7 @@ bool checkPiecePos(PiecePos *piece)
 			return false;
 		}
 		// Not on board block
-		else if (GetRow(piece[block].y)->cols[piece[block].x] != None)
+		else if (TetrisBoard[piece[block].y]->cols[piece[block].x] != None)
 		{
 			return false;
 		}
@@ -222,17 +212,14 @@ static void addPiece()
 void InitTetris()
 {
 	int rows = TETRIS_BOARD_ROWS;
-	TetrisBoard = (Row*)calloc(sizeof(Row), rows);
-	_baseRow = 0;
+	TetrisBoard = (Row**)calloc(sizeof(Row), TETRIS_BOARD_ROWS);
 
-	std::cout << "Base Row: " << GetBaseRow() << std::endl;
 	for (int y = rows - 1; y >= 0; y--)
 	{
 		std::cout << "Row " << y << ":\t";
-		Row *r = GetRow(y);
 		for (int x = 0; x < TETRIS_BOARD_ROWS; x++)
 		{
-			std::cout << (r->cols[x] != None ? "1 " : "0 ");
+			std::cout << (TetrisBoard[y]->cols[x] != None ? "1 " : "0 ");
 		}
 		std::cout << std::endl;
 	}
@@ -267,10 +254,7 @@ static void DrawTetris(RGBMatrix *matrix)
 				int col = (x - BOARD_X_OFFSET) / BLOCK_SIZE;
 				int row = (canvas->height() - y - BOARD_Y_OFFSET - 1) / BLOCK_SIZE;
 
-				Row *tRow = GetRow(row);
-				BlockStatus bStatus = tRow->cols[col];
-
-				if (bStatus == None)
+				if (TetrisBoard[row]->cols[col] == None)
 				{
 					// Draw board background or piece block
 					canvas->SetPixel(x, y, 0, 0, 0);
@@ -294,19 +278,28 @@ static void DrawTetris(RGBMatrix *matrix)
 						}
 					}
 				}
+				else if (TetrisBoard[row]->toClear)
+				{
+					// Draw clear line animation
+					uint shift = _clearTimer * 4;
+					if (shift > 255)
+					{
+						shift = 0;
+					}
+					canvas->SetPixel(x, y, 255 - shift, 255 - shift, 255 - shift);
+				}
 				else
 				{
 					// Draw board block
 					int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
 					int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
+					
 					if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
 					{
 						// Draw block border
 						Color *c = new Color(255, 255, 255);
-						switch(bStatus)
+						switch(TetrisBoard[row]->cols[col])
 						{
-							case Clearing:
-								break;
 							case Default:
 								c = _defaultColor;
 								break;
@@ -328,16 +321,7 @@ static void DrawTetris(RGBMatrix *matrix)
 					}
 					else
 					{
-						// Draw block
-						if (bStatus == Clearing)
-						{
-							// TODO set fade
-							canvas->SetPixel(x, y, 255, 255, 255);
-						}
-						else 
-						{
-							canvas->SetPixel(x, y, 20, 20, 20);
-						}
+						canvas->SetPixel(x, y, 20, 20, 20);
 					}
 				}
 			}
@@ -348,49 +332,43 @@ static void DrawTetris(RGBMatrix *matrix)
 
 void PlayTetris()
 {	
-	// Check if in clearing stage
-	if(!_isLineClearing)
+
+	switch (_tState)
 	{
-		// Handle move
-		for (int block = 0; block < PIECE_SIZE; block++)
-		{
-			// Save current piece
-			savedPiece[block] = currentPiece[block];
-
-			// TODO handle move
-			// currentPiece[block].x += xMovement
-			// currentPiece[block].y += yMovement
-		}
-		checkCurrentPiecePos();
-
-		// Handle rotate
-		if (_rotate)
-		{
-			PiecePos rotationPos = currentPiece[1];
+		case Normal:
+					// Handle move
 			for (int block = 0; block < PIECE_SIZE; block++)
 			{
 				// Save current piece
 				savedPiece[block] = currentPiece[block];
 
-				// Transpose y distance from rotationPos to x axis
-				int x = savedPiece[block].y - rotationPos.y;
-				currentPiece[block].x = rotationPos.x - x;
-
-				// Transpose x distance from rotationPos to y axis
-				int y = savedPiece[block].x - rotationPos.x;
-				currentPiece[block].y = rotationPos.y + y;
+				// TODO handle move
+				// currentPiece[block].x += xMovement
+				// currentPiece[block].y += yMovement
 			}
 			checkCurrentPiecePos();
-			_rotate = false;
-		}
 
-		if (_linesToClear != 0)
-		{
-			// Finished clearing stage
-			IncreaseBaseRow();
-		}
-		else 
-		{
+			// Handle rotate
+			if (_rotate)
+			{
+				PiecePos rotationPos = currentPiece[1];
+				for (int block = 0; block < PIECE_SIZE; block++)
+				{
+					// Save current piece
+					savedPiece[block] = currentPiece[block];
+
+					// Transpose y distance from rotationPos to x axis
+					int x = savedPiece[block].y - rotationPos.y;
+					currentPiece[block].x = rotationPos.x - x;
+
+					// Transpose x distance from rotationPos to y axis
+					int y = savedPiece[block].x - rotationPos.x;
+					currentPiece[block].y = rotationPos.y + y;
+				}
+				checkCurrentPiecePos();
+				_rotate = false;
+			}
+
 			if (_gravityTimer >= GRAVITY_TIMER)
 			{	
 				// Handle piece gravity
@@ -406,7 +384,7 @@ void PlayTetris()
 					// Piece is at bottom
 					for (int block = 0; block < PIECE_SIZE; block++)
 					{
-						GetRow(savedPiece[block].y)->cols[savedPiece[block].x] = _currentPieceStatus;
+						TetrisBoard[savedPiece[block].y]->cols[savedPiece[block].x] = _currentPieceStatus;
 					}
 
 					addPiece();
@@ -419,40 +397,41 @@ void PlayTetris()
 				_gravityTimer++;
 			}
 			
-
 			// Check if lines need to be cleared
-			int linesToClear = 0;
-			for (bool isClear = true; linesToClear < TETRIS_BOARD_ROWS && isClear;)
+			for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
 			{
-				Row *r = GetRow(linesToClear);
 				for (int c = 0; c < TETRIS_BOARD_COLS; c++)
 				{
-					if (r->cols[c] == None)
+					if (TetrisBoard[r]->cols[c] == None)
 					{
-						isClear = false;
 						break;
 					}
-				}
-				r++;
-			}
 
-			if (linesToClear > 0)
-			{
-				// Enter clearing stage
-				ClearLines(linesToClear);
+				}
+				// Line marked to be cleared
+				_tState = ClearAnimation;
+				TetrisBoard[r]->toClear = true;
 			}
-		}
+			break;
+		case ClearAnimation:
+			if (_clearTimer >= LINE_CLEAR_TIMER)
+			{
+				// Mark the end of the line clearing stage
+				_clearTimer = 0;
+				_tState = Clearing;
+			}
+			else
+			{
+				// Line clearing stage
+				_clearTimer++;
+			}
+			break;
+		case Clearing:
+			ClearLines();
+			break;
 	}
-	else if (_clearTimer >= LINE_CLEAR_TIMER)
-	{
-		// Mark the end of the line clearing stage
-		_isLineClearing = 0;
-	}
-	else
-	{
-		// Line clearing stage
-		_clearTimer++;
-	}
+	
+	
 }
 
 void CleanupTetris()
