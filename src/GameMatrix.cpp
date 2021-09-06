@@ -132,11 +132,6 @@ static Row* GetRow(int rowNum)
 	return &TetrisBoard[row];
 }
 
-static Color* GetDefaultColor()
-{
-	return new Color(_defaultColor->r, _defaultColor->g, _defaultColor->b);
-}
-
 static void UpdateDefaultColor()
 {
 	if (_defaultColor->r < 255)
@@ -309,12 +304,12 @@ static void DrawTetris(RGBMatrix *matrix)
 							int bY = (canvas->height() -y - BOARD_Y_OFFSET) % BLOCK_SIZE;
 							if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
 							{
-								// Draw piece block
+								// Draw piece block border
 								canvas->SetPixel(x, y, 255, 25, 25);
 							}
 							else 
 							{
-								// Draw piece block border
+								// Draw piece block
 								canvas->SetPixel(x, y, 20, 20, 20);
 							}
 							break;
@@ -329,26 +324,13 @@ static void DrawTetris(RGBMatrix *matrix)
 					if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
 					{
 						// Draw block border
-						if (bStatus == Clearing)
-						{
-							// TODO set fade
-							canvas->SetPixel(x, y, 255, 255, 255);
-						}
-						else 
-						{
-							canvas->SetPixel(x, y, 20, 20, 20);
-						}
-					}
-					else
-					{
-						// Draw block color
 						Color *c = new Color(255, 255, 255);
 						switch(bStatus)
 						{
 							case Clearing:
 								break;
 							case Default:
-								c = GetDefaultColor();
+								c = _defaultColor;
 								break;
 							case Blue:
 								c->r = 38;
@@ -365,6 +347,19 @@ static void DrawTetris(RGBMatrix *matrix)
 								break;
 						}
 						canvas->SetPixel(x, y, c->r, c->g, c->b);
+					}
+					else
+					{
+						// Draw block
+						if (bStatus == Clearing)
+						{
+							// TODO set fade
+							canvas->SetPixel(x, y, 255, 255, 255);
+						}
+						else 
+						{
+							canvas->SetPixel(x, y, 20, 20, 20);
+						}
 					}
 				}
 			}
