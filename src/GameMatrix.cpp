@@ -98,7 +98,7 @@ int pieceShapes[7][4] =
     2,3,4,5, // O
 };
 
-static Row ** TetrisBoard;
+static Row * TetrisBoard;
 
 static Color * _defaultColor;
 
@@ -126,9 +126,9 @@ static void copyLine(int src, int dest)
 {
 	for (int i = 0; i < TETRIS_BOARD_COLS; i++)
 	{
-		TetrisBoard[dest]->cols[i] = TetrisBoard[src]->cols[i];
+		TetrisBoard[dest].cols[i] = TetrisBoard[src].cols[i];
 	}
-	TetrisBoard[dest]->toClear = false;
+	TetrisBoard[dest].toClear = false;
 }
 
 static void ClearLines ()
@@ -136,7 +136,7 @@ static void ClearLines ()
 	int lowestValidRow = 0;
 	for (int i = 0; i < TETRIS_BOARD_ROWS; i++)
 	{
-		if (!TetrisBoard[i]->toClear)
+		if (!TetrisBoard[i].toClear)
 		{
 			// Move valid row to lowest row
 			if (lowestValidRow < i)
@@ -152,8 +152,8 @@ static void ClearLines ()
 	{
 		for (int i = 0; i < TETRIS_BOARD_COLS; i++)
 		{
-			TetrisBoard[lowestValidRow]->cols[i] = None;
-			TetrisBoard[lowestValidRow]->toClear = false;
+			TetrisBoard[lowestValidRow].cols[i] = None;
+			TetrisBoard[lowestValidRow].toClear = false;
 		}
 	}
 
@@ -174,7 +174,7 @@ bool checkPiecePos(PiecePos *piece)
 			return false;
 		}
 		// Not on board block
-		else if (TetrisBoard[piece[block].y]->cols[piece[block].x] != None)
+		else if (TetrisBoard[piece[block].y].cols[piece[block].x] != None)
 		{
 			return false;
 		}
@@ -211,17 +211,15 @@ static void addPiece()
 
 void InitTetris()
 {
+	TetrisBoard = (Row*)calloc(sizeof(Row), TETRIS_BOARD_ROWS);
+
 	int rows = TETRIS_BOARD_ROWS;
-	TetrisBoard = (Row**)calloc(sizeof(Row), TETRIS_BOARD_ROWS);
-
-	std::cout << "Board allocated";
-
 	for (int y = rows - 1; y >= 0; y--)
 	{
 		std::cout << "Row " << y << ":\t";
 		for (int x = 0; x < TETRIS_BOARD_ROWS; x++)
 		{
-			std::cout << (TetrisBoard[y]->cols[x] != None ? "1 " : "0 ");
+			std::cout << (TetrisBoard[y].cols[x] != None ? "1 " : "0 ");
 		}
 		std::cout << std::endl;
 	}
@@ -256,7 +254,7 @@ static void DrawTetris(RGBMatrix *matrix)
 				int col = (x - BOARD_X_OFFSET) / BLOCK_SIZE;
 				int row = (canvas->height() - y - BOARD_Y_OFFSET - 1) / BLOCK_SIZE;
 
-				if (TetrisBoard[row]->cols[col] == None)
+				if (TetrisBoard[row].cols[col] == None)
 				{
 					// Draw board background or piece block
 					canvas->SetPixel(x, y, 0, 0, 0);
@@ -280,7 +278,7 @@ static void DrawTetris(RGBMatrix *matrix)
 						}
 					}
 				}
-				else if (TetrisBoard[row]->toClear)
+				else if (TetrisBoard[row].toClear)
 				{
 					// Draw clear line animation
 					uint shift = _clearTimer * 4;
@@ -300,7 +298,7 @@ static void DrawTetris(RGBMatrix *matrix)
 					{
 						// Draw block border
 						Color *c = new Color(255, 255, 255);
-						switch(TetrisBoard[row]->cols[col])
+						switch(TetrisBoard[row].cols[col])
 						{
 							case Default:
 								c = _defaultColor;
@@ -386,7 +384,7 @@ void PlayTetris()
 					// Piece is at bottom
 					for (int block = 0; block < PIECE_SIZE; block++)
 					{
-						TetrisBoard[savedPiece[block].y]->cols[savedPiece[block].x] = _currentPieceStatus;
+						TetrisBoard[savedPiece[block].y].cols[savedPiece[block].x] = _currentPieceStatus;
 					}
 
 					addPiece();
@@ -404,7 +402,7 @@ void PlayTetris()
 			{
 				for (int c = 0; c < TETRIS_BOARD_COLS; c++)
 				{
-					if (TetrisBoard[r]->cols[c] == None)
+					if (TetrisBoard[r].cols[c] == None)
 					{
 						break;
 					}
@@ -412,7 +410,7 @@ void PlayTetris()
 				}
 				// Line marked to be cleared
 				_tState = ClearAnimation;
-				TetrisBoard[r]->toClear = true;
+				TetrisBoard[r].toClear = true;
 			}
 			break;
 		case ClearAnimation:
