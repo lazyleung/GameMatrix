@@ -24,8 +24,9 @@ using rgb_matrix::Canvas;
 #define BOARD_X_OFFSET 7
 #define BOARD_Y_OFFSET 4
 
-#define LINE_CLEAR_TIMER 20
-#define GRAVITY_TIMER 60
+#define LINE_CLEAR_TARGET 30
+#define GRAVITY_UPDATE_TARGET 60
+#define GRAVITY_BOTTOM_TARGET 2
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -120,8 +121,9 @@ enum rotateState
 };
 static rotateState _rotateState;
 
-static int _clearTimer;
-static int _gravityTimer;
+static int _gravityCount;
+static int _bottomCount;
+static int _clearCount;
 
 // ---------- Helpers ----------
 
@@ -255,8 +257,9 @@ void InitTetris()
 
 	_tState = Normal;
 	_defaultColor = new Color(0, 0, 0);
-	_gravityTimer = 0;
-	_clearTimer = 0;
+	_gravityCount = 0;
+	_bottomCount = 0;
+	_clearCount = 0;
 
 	addPiece();
 }
@@ -313,7 +316,7 @@ static void DrawTetris(RGBMatrix *matrix)
 				else if (TetrisBoard[row].toClear)
 				{
 					// Draw clear line animation
-					uint shift = _clearTimer * 4;
+					uint shift = _clearCount * 4;
 					if (shift > 255)
 					{
 						shift = 0;
@@ -484,7 +487,7 @@ void PlayTetris()
 				_rotateState = NoRotate;
 			}
 
-			if (_gravityTimer >= GRAVITY_TIMER)
+			if (_gravityCount++ >= GRAVITY_UPDATE_TARGET)
 			{
 				// Handle piece gravity
 				for (int block = 0; block < PIECE_SIZE; block++)
@@ -505,45 +508,41 @@ void PlayTetris()
 					addPiece();
 				}
 
-				_gravityTimer = 0;
-			}
-			else
-			{
-				_gravityTimer++;
-			}
-			
-			// Check if lines need to be cleared
-			for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
-			{
-				for (int c = 0; c < TETRIS_BOARD_COLS; c++)
+				_gravityCount = 0;
+
+				if(_bottomCount++ >= GRAVITY_BOTTOM_TARGET)
 				{
-					if (TetrisBoard[r].cols[c] == None)
+					// Check if lines need to be cleared
+					for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
 					{
-						// Gap found in line
-						break;
+						for (int c = 0; c < TETRIS_BOARD_COLS; c++)
+						{
+							if (TetrisBoard[r].cols[c] == None)
+							{
+								// Gap found in line
+								break;
+							}
+							if (c == TETRIS_BOARD_COLS - 1)
+							{
+								// Line marked to be cleared
+								_tState = ClearAnimation;
+								TetrisBoard[r].toClear = true;
+							}
+						}
 					}
-					if (c == TETRIS_BOARD_COLS - 1)
-					{
-						// Line marked to be cleared
-						_tState = ClearAnimation;
-						TetrisBoard[r].toClear = true;
-					}
+
+					_bottomCount = 0;
 				}
 			}
 			break;
 		}
 		case ClearAnimation:
 		{
-			if (_clearTimer >= LINE_CLEAR_TIMER)
+			if (_clearCount++ >= LINE_CLEAR_TARGET)
 			{
 				// Mark the end of the line clearing stage
-				_clearTimer = 0;
+				_clearCount = 0;
 				_tState = Clearing;
-			}
-			else
-			{
-				// Line clearing stage
-				_clearTimer++;
 			}
 			break;
 		}
