@@ -316,7 +316,7 @@ static void DrawTetris(RGBMatrix *matrix)
 				else if (TetrisBoard[row].toClear)
 				{
 					// Draw clear line animation
-					uint shift = _clearCount * 4;
+					uint shift = _clearCount * 3;
 					if (shift > 255)
 					{
 						shift = 0;
