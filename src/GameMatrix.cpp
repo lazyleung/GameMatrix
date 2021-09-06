@@ -21,9 +21,10 @@ using rgb_matrix::Canvas;
 #define BOARD_X_OFFSET 7
 #define BOARD_Y_OFFSET 4
 
-
 #define LINE_CLEAR_TIMER 20
 #define GRAVITY_TIMER 60
+
+#define RANDOM_COLOR_STEP 2
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -134,32 +135,45 @@ static Row* GetRow(int rowNum)
 
 static void UpdateDefaultColor()
 {
-	if (_defaultColor->r < 255)
+	switch (rand() % 5)
 	{
-		_defaultColor->r+=5;
+		case 0:
+			if(_defaultColor->r < 255 - RANDOM_COLOR_STEP)
+				_defaultColor->r+=RANDOM_COLOR_STEP;
+			else
+				_defaultColor->r-=RANDOM_COLOR_STEP;
+			break;
+		case 1:
+			if(_defaultColor->g < 255 - RANDOM_COLOR_STEP)
+				_defaultColor->g+=RANDOM_COLOR_STEP;
+			else
+				_defaultColor->g-=RANDOM_COLOR_STEP;
+			break;
+		case 2:
+			if(_defaultColor->b < 255 - RANDOM_COLOR_STEP)
+				_defaultColor->b+=RANDOM_COLOR_STEP;
+			else
+				_defaultColor->b-=RANDOM_COLOR_STEP;
+			break;
+		case 3:
+			if(_defaultColor->r > 0 + RANDOM_COLOR_STEP)
+				_defaultColor->r-=RANDOM_COLOR_STEP;
+			else
+				_defaultColor->r+=RANDOM_COLOR_STEP;
+			break;
+		case 4:
+			if(_defaultColor->g > 0 + RANDOM_COLOR_STEP)
+				_defaultColor->g-=RANDOM_COLOR_STEP;
+			else
+				_defaultColor->g+=RANDOM_COLOR_STEP;
+			break;
+		case 5:
+			if(_defaultColor->b > 0 + RANDOM_COLOR_STEP)
+				_defaultColor->b-=RANDOM_COLOR_STEP;
+			else
+				_defaultColor->b+=RANDOM_COLOR_STEP;
+			break;
 	}
-	else if (_defaultColor->g < 255)
-	{
-		_defaultColor->g+=5;
-	}
-	else if (_defaultColor->b < 255)
-	{
-		_defaultColor->b+=5;
-	}
-	else if (_defaultColor->b > 0)
-	{
-		_defaultColor->b-=5;
-	}
-	else if (_defaultColor->g > 0)
-	{
-		_defaultColor->g-=5;
-	}
-	else if (_defaultColor->r > 0)
-	{
-		_defaultColor->r-=5;
-	}
-
-	std::cout << "Default color is now: " << unsigned(_defaultColor->r) << "\t" << unsigned(_defaultColor->g) << "\t" << unsigned(_defaultColor->b) << std::endl;
 }
 
 static void ClearLines (int y)
