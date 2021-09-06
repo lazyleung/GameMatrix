@@ -272,6 +272,8 @@ static void DrawTetris(RGBMatrix *matrix)
 {
 	FrameCanvas *canvas = matrix->CreateFrameCanvas();
 
+	UpdateDefaultColor();
+
 	for (int x = 0; x < canvas->width(); x++)
 	{
 		for (int y = 0; y < canvas->height(); y++)
@@ -369,8 +371,6 @@ static void DrawTetris(RGBMatrix *matrix)
 		}
 	}
 	matrix->SwapOnVSync(canvas, 2U);
-
-	UpdateDefaultColor();
 }
 
 void PlayTetris()
