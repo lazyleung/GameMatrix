@@ -112,8 +112,8 @@ enum TetrisState
 };
 static TetrisState _tState;
 
-static int _clearTimer = 0;
-static int _gravityTimer = 0;
+static int _clearTimer;
+static int _gravityTimer;
 
 // ---------- Accessors ----------
 
@@ -156,8 +156,6 @@ static void ClearLines ()
 			TetrisBoard[lowestValidRow].toClear = false;
 		}
 	}
-
-	_tState = Normal;
 }
 
 // ---------- Helpers ----------
@@ -226,6 +224,8 @@ void InitTetris()
 
 	_tState = Normal;
 	_defaultColor = new Color(0, 0, 0);
+	_gravityTimer = 0;
+	_clearTimer = 0;
 
 	addPiece();
 }
@@ -336,7 +336,7 @@ void PlayTetris()
 	switch (_tState)
 	{
 		case Normal:
-					// Handle move
+			// Handle move
 			for (int block = 0; block < PIECE_SIZE; block++)
 			{
 				// Save current piece
@@ -370,7 +370,7 @@ void PlayTetris()
 			}
 
 			if (_gravityTimer >= GRAVITY_TIMER)
-			{	
+			{
 				// Handle piece gravity
 				for (int block = 0; block < PIECE_SIZE; block++)
 				{
@@ -428,6 +428,7 @@ void PlayTetris()
 			break;
 		case Clearing:
 			ClearLines();
+			_tState = Normal;
 			break;
 	}
 }
