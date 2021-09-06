@@ -223,33 +223,11 @@ bool inputAvailable()
 	return (FD_ISSET(0, &fds));
 }
 
-static char getch() {
-	static bool is_terminal = isatty(STDIN_FILENO);
-
-	struct termios old;
-	if (is_terminal) {
-		if (tcgetattr(0, &old) < 0)
-			perror("tcsetattr()");
-
-		// Set to unbuffered mode
-		struct termios no_echo = old;
-		no_echo.c_lflag &= ~ICANON;
-		no_echo.c_lflag &= ~ECHO;
-		no_echo.c_cc[VMIN] = 1;
-		no_echo.c_cc[VTIME] = 0;
-		if (tcsetattr(0, TCSANOW, &no_echo) < 0)
-			perror("tcsetattr ICANON");
-	}
-
+static char getch() 
+{
 	char buf = 0;
 	if (read(STDIN_FILENO, &buf, 1) < 0)
 		perror ("read()");
-
-	if (is_terminal) {
-		// Back to original terminal settings.
-		if (tcsetattr(0, TCSADRAIN, &old) < 0)
-		perror ("tcsetattr ~ICANON");
-	}
 
 	return buf;
 }
@@ -617,11 +595,33 @@ int main(int argc, char *argv[]) {
 	// StartUp Animation
 	DrawOnCanvas(matrix);
 
+	struct termios old;
+	bool is_terminal = isatty(STDIN_FILENO);
+	if (is_terminal) {
+		if (tcgetattr(0, &old) < 0)
+			perror("tcsetattr()");
+
+		// Set to unbuffered mode
+		struct termios no_echo = old;
+		no_echo.c_lflag &= ~ICANON;
+		no_echo.c_lflag &= ~ECHO;
+		no_echo.c_cc[VMIN] = 1;
+		no_echo.c_cc[VTIME] = 0;
+		if (tcsetattr(0, TCSANOW, &no_echo) < 0)
+			perror("tcsetattr ICANON");
+	}
+
 	// Tetris Engine
 	while (!interrupt_received && _running)
 	{
 		PlayTetris();
 		DrawTetris(matrix);
+	}
+
+	if (is_terminal) {
+		// Back to original terminal settings.
+		if (tcsetattr(0, TCSADRAIN, &old) < 0)
+		perror ("tcsetattr ~ICANON");
 	}
 
 	CleanupTetris();
