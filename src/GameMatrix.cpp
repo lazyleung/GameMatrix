@@ -214,6 +214,8 @@ void InitTetris()
 	int rows = TETRIS_BOARD_ROWS;
 	TetrisBoard = (Row**)calloc(sizeof(Row), TETRIS_BOARD_ROWS);
 
+	std::cout << "Board allocated";
+
 	for (int y = rows - 1; y >= 0; y--)
 	{
 		std::cout << "Row " << y << ":\t";
