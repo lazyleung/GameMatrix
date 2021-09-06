@@ -211,6 +211,7 @@ static void addPiece()
 	}
 }
 
+// Check if there is any input on the unbuffered terminal
 bool inputAvailable()
 {
 	struct timeval tv;
@@ -223,6 +224,7 @@ bool inputAvailable()
 	return (FD_ISSET(0, &fds));
 }
 
+// Get single char
 static char getch() 
 {
 	char buf = 0;
@@ -595,13 +597,13 @@ int main(int argc, char *argv[]) {
 	// StartUp Animation
 	DrawOnCanvas(matrix);
 
+	// Set terminal to unbuffered mode
 	struct termios old;
 	bool is_terminal = isatty(STDIN_FILENO);
 	if (is_terminal) {
 		if (tcgetattr(0, &old) < 0)
 			perror("tcsetattr()");
 
-		// Set to unbuffered mode
 		struct termios no_echo = old;
 		no_echo.c_lflag &= ~ICANON;
 		no_echo.c_lflag &= ~ECHO;
@@ -618,8 +620,8 @@ int main(int argc, char *argv[]) {
 		DrawTetris(matrix);
 	}
 
+	// Restore terminal attributes
 	if (is_terminal) {
-		// Back to original terminal settings.
 		if (tcsetattr(0, TCSADRAIN, &old) < 0)
 		perror ("tcsetattr ~ICANON");
 	}
