@@ -24,9 +24,9 @@ using rgb_matrix::Canvas;
 #define BOARD_X_OFFSET 7
 #define BOARD_Y_OFFSET 4
 
-#define LINE_CLEAR_TARGET 30
+#define LINE_CLEAR_TARGET 50
 #define GRAVITY_UPDATE_TARGET 60
-#define GRAVITY_BOTTOM_TARGET 40
+#define GRAVITY_BOTTOM_TARGET 45
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -295,7 +295,7 @@ static void DrawTetris(RGBMatrix *matrix)
 					canvas->SetPixel(x, y, 0, 0, 0);
 					for (int block = 0; block < PIECE_SIZE; block++)
 					{
-						if (currentPiece[block].x == col && currentPiece[block].y == row)
+						if (_tState != ClearAnimation && currentPiece[block].x == col && currentPiece[block].y == row)
 						{
 							int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
 							int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
@@ -457,6 +457,7 @@ void PlayTetris()
 					int x = savedPiece[block].y - rotationPos.y;
 					int y = savedPiece[block].x - rotationPos.x;
 
+					// TODO Rotate not blocked by walls and height
 					switch (_rotateState)
 					{
 						case Clockwise:
