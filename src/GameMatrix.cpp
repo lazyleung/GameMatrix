@@ -9,7 +9,7 @@
 #include <iostream>
 #include <signal.h>
 #include <stdlib.h>
-#include <termio.h>
+#include <termios.h>
 
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
@@ -211,6 +211,18 @@ static void addPiece()
 	}
 }
 
+bool inputAvailable()
+{
+	struct timeval tv;
+	fd_set fds;
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	FD_ZERO(&fds);
+	FD_SET(STDIN_FILENO, &fds);
+	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+	return (FD_ISSET(0, &fds));
+}
+
 static char getch() {
 	static bool is_terminal = isatty(STDIN_FILENO);
 
@@ -382,54 +394,58 @@ void PlayTetris()
 	{
 		case Normal:
 		{
-			// Capture Input
-			const char c = tolower(getch());
 			int xShift = 0;
 			int yshift = 0;
 			_rotateState = NoRotate;
-			switch (c)
+
+			// Capture Input
+			if (inputAvailable())
 			{
-				case 'w': // Up
-				case 'k':
+				const char c = tolower(getch());
+				switch (c)
 				{
-					// TODO drop
-					break;
-				}
-				case 's': // Down
-				case 'j':
-				{
-					yshift--;
-					break;
-				}
-				case 'a': // Left
-				case 'h':
-				{
-					xShift--;
-					break;
-				}
-				case 'd': // Right
-				case 'l':
-				{
-					xShift++;
-					break;
-				}
-				case 'q': // Rotate
-				{
-					_rotateState = CounterClockwise;
-					break;
-				}
-				case 'e': // Rotate
-				{
-					_rotateState = Clockwise;
-					break;
-				}
-				// Exit program
-				case 0x1B:           // Escape
-				case 0x04:           // End of file
-				case 0x00:           // Other issue from getch()
-				{
-					_running = false;
-					break;
+					case 'w': // Up
+					case 'k':
+					{
+						// TODO drop
+						break;
+					}
+					case 's': // Down
+					case 'j':
+					{
+						yshift--;
+						break;
+					}
+					case 'a': // Left
+					case 'h':
+					{
+						xShift--;
+						break;
+					}
+					case 'd': // Right
+					case 'l':
+					{
+						xShift++;
+						break;
+					}
+					case 'q': // Rotate
+					{
+						_rotateState = CounterClockwise;
+						break;
+					}
+					case 'e': // Rotate
+					{
+						_rotateState = Clockwise;
+						break;
+					}
+					// Exit program
+					case 0x1B:           // Escape
+					case 0x04:           // End of file
+					case 0x00:           // Other issue from getch()
+					{
+						_running = false;
+						break;
+					}
 				}
 			}
 
@@ -439,9 +455,6 @@ void PlayTetris()
 				// Save current piece
 				savedPiece[block] = currentPiece[block];
 
-				
-
-				// TODO handle move
 				currentPiece[block].x += xShift;
 				currentPiece[block].y += yshift;
 			}
