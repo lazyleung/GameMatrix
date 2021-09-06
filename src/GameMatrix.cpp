@@ -26,7 +26,7 @@ using rgb_matrix::Canvas;
 
 #define LINE_CLEAR_TARGET 30
 #define GRAVITY_UPDATE_TARGET 60
-#define GRAVITY_BOTTOM_TARGET 1
+#define GRAVITY_BOTTOM_TARGET 90
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -122,7 +122,6 @@ enum rotateState
 static rotateState _rotateState;
 
 static int _gravityCount;
-static int _bottomCount;
 static int _clearCount;
 
 // ---------- Helpers ----------
@@ -258,7 +257,6 @@ void InitTetris()
 	_tState = Normal;
 	_defaultColor = new Color(0, 0, 0);
 	_gravityCount = 0;
-	_bottomCount = 0;
 	_clearCount = 0;
 
 	addPiece();
@@ -499,7 +497,7 @@ void PlayTetris()
 				}
 				if(!checkPiecePos(currentPiece))
 				{	
-					if(_bottomCount++ >= GRAVITY_BOTTOM_TARGET)
+					if(_gravityCount++ >= GRAVITY_BOTTOM_TARGET)
 					{
 						// Piece is at bottom
 						for (int block = 0; block < PIECE_SIZE; block++)
@@ -509,7 +507,7 @@ void PlayTetris()
 
 						addPiece();
 
-						_bottomCount = 0;
+						_gravityCount = 0;
 					}
 					else
 					{
@@ -539,8 +537,6 @@ void PlayTetris()
 						}
 					}
 				}
-
-				_gravityCount = 0;
 			}
 			break;
 		}
