@@ -213,6 +213,8 @@ static void addPiece()
 
 bool inputAvailable()
 {
+	std::cin.clear();
+	
 	struct timeval tv;
 	fd_set fds;
 	tv.tv_sec = 0;
@@ -241,6 +243,8 @@ static char getch() {
 			perror("tcsetattr ICANON");
 	}
 
+	std::cout << "Reading! ";
+
 	char buf = 0;
 	if (read(STDIN_FILENO, &buf, 1) < 0)
 		perror ("read()");
@@ -250,7 +254,8 @@ static char getch() {
 		if (tcsetattr(0, TCSADRAIN, &old) < 0)
 		perror ("tcsetattr ~ICANON");
 	}
-
+	
+	std::cout << "Captured buf: " << buf << std::endl;
 	return buf;
 }
 
