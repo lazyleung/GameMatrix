@@ -135,45 +135,7 @@ static Row* GetRow(int rowNum)
 
 static void UpdateDefaultColor()
 {
-	switch (rand() % 5)
-	{
-		case 0:
-			if(_defaultColor->r < 255 - RANDOM_COLOR_STEP)
-				_defaultColor->r+=RANDOM_COLOR_STEP;
-			else
-				_defaultColor->r-=RANDOM_COLOR_STEP;
-			break;
-		case 1:
-			if(_defaultColor->g < 255 - RANDOM_COLOR_STEP)
-				_defaultColor->g+=RANDOM_COLOR_STEP;
-			else
-				_defaultColor->g-=RANDOM_COLOR_STEP;
-			break;
-		case 2:
-			if(_defaultColor->b < 255 - RANDOM_COLOR_STEP)
-				_defaultColor->b+=RANDOM_COLOR_STEP;
-			else
-				_defaultColor->b-=RANDOM_COLOR_STEP;
-			break;
-		case 3:
-			if(_defaultColor->r > 0 + RANDOM_COLOR_STEP)
-				_defaultColor->r-=RANDOM_COLOR_STEP;
-			else
-				_defaultColor->r+=RANDOM_COLOR_STEP;
-			break;
-		case 4:
-			if(_defaultColor->g > 0 + RANDOM_COLOR_STEP)
-				_defaultColor->g-=RANDOM_COLOR_STEP;
-			else
-				_defaultColor->g+=RANDOM_COLOR_STEP;
-			break;
-		case 5:
-			if(_defaultColor->b > 0 + RANDOM_COLOR_STEP)
-				_defaultColor->b-=RANDOM_COLOR_STEP;
-			else
-				_defaultColor->b+=RANDOM_COLOR_STEP;
-			break;
-	}
+	_defaultColor->g++;
 }
 
 static void ClearLines (int y)
@@ -348,7 +310,6 @@ static void DrawTetris(RGBMatrix *matrix)
 							case Clearing:
 								break;
 							case Default:
-								// TODO not working
 								c = _defaultColor;
 								break;
 							case Blue:
