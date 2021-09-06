@@ -406,11 +406,13 @@ void PlayTetris()
 					{
 						break;
 					}
-
+					if (c == TETRIS_BOARD_COLS - 1)
+					{
+						// Line marked to be cleared
+						_tState = ClearAnimation;
+						TetrisBoard[r].toClear = true;
+					}
 				}
-				// Line marked to be cleared
-				_tState = ClearAnimation;
-				TetrisBoard[r].toClear = true;
 			}
 			break;
 		case ClearAnimation:
