@@ -214,6 +214,8 @@ static void addPiece()
 // Check if there is any input on the unbuffered terminal
 bool inputAvailable()
 {
+	std::cin.clear();
+	
 	struct timeval tv;
 	fd_set fds;
 	tv.tv_sec = 0;
