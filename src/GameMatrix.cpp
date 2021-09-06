@@ -159,7 +159,7 @@ static void UpdateDefaultColor()
 		_defaultColor->r-=5;
 	}
 
-	std::cout << "Default color is now: " << unsigned(_defaultColor->r) << "\t" << unsigned(_defaultColor->g) << "\t" << unsigned(_defaultColor->b) << std:endl;
+	std::cout << "Default color is now: " << unsigned(_defaultColor->r) << "\t" << unsigned(_defaultColor->g) << "\t" << unsigned(_defaultColor->b) << std::endl;
 }
 
 static void ClearLines (int y)
