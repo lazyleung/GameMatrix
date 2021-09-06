@@ -233,6 +233,19 @@ void checkCurrentPiecePos()
 	}
 }
 
+static void addPiece()
+{
+	// Insert base piece
+	int shape = rand() % 7;
+	// TODO add random color status
+	_currentPieceStatus = Default;
+	for (int block = 0; block < PIECE_SIZE; block++)
+	{
+		currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
+		currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
+	}
+}
+
 // ---------- Game Functions ----------
 
 void InitTetris()
@@ -255,17 +268,7 @@ void InitTetris()
 
 	_defaultColor = new Color(0, 0, 0);
 
-	// TODO Need to zero currentPiece or savedPiece?
-
-	// Insert base piece
-	int shape = rand() % 7;
-	// TODO add random color status
-	_currentPieceStatus = Default;
-	for (int block = 0; block < PIECE_SIZE; block++)
-	{
-		currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
-		currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
-	}
+	addPiece();
 }
 
 static void DrawTetris(RGBMatrix *matrix)
@@ -302,8 +305,18 @@ static void DrawTetris(RGBMatrix *matrix)
 					{
 						if (currentPiece[block].x == col && currentPiece[block].y == row)
 						{
-							// Draw piece block
-							canvas->SetPixel(x, y, 255, 25, 25);
+							int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
+							int bY = (canvas->height() -y - BOARD_Y_OFFSET) % BLOCK_SIZE;
+							if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
+							{
+								// Draw piece block
+								canvas->SetPixel(x, y, 255, 25, 25);
+							}
+							else 
+							{
+								// Draw piece block border
+								canvas->SetPixel(x, y, 20, 20, 20);
+							}
 							break;
 						}
 					}
@@ -358,6 +371,8 @@ static void DrawTetris(RGBMatrix *matrix)
 		}
 	}
 	matrix->SwapOnVSync(canvas, 2U);
+
+	UpdateDefaultColor();
 }
 
 void PlayTetris()
@@ -423,15 +438,7 @@ void PlayTetris()
 						GetRow(savedPiece[block].y)->cols[savedPiece[block].x] = _currentPieceStatus;
 					}
 
-					// Insert base piece
-					int shape = rand() % 7;
-					// TODO add random color status
-					_currentPieceStatus = Default;
-					for (int block = 0; block < PIECE_SIZE; block++)
-					{
-						currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
-						currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
-					}
+					addPiece();
 				}
 
 				_gravityTimer = 0;
@@ -475,8 +482,6 @@ void PlayTetris()
 		// Line clearing stage
 		_clearTimer++;
 	}
-
-	UpdateDefaultColor();
 }
 
 void CleanupTetris()
