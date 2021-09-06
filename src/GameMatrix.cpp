@@ -22,8 +22,8 @@ using rgb_matrix::Canvas;
 #define BOARD_Y_OFFSET 4
 
 
-#define LINE_CLEAR_TIMER 10
-#define GRAVITY_TIMER 5
+#define LINE_CLEAR_TIMER 20
+#define GRAVITY_TIMER 60
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -108,6 +108,8 @@ static bool _rotate = false;
 static bool _isLineClearing = false;
 static int _linesToClear = 0;
 static int _clearTimer = 0;
+
+static int _gravityTimer = 0;
 
 // ---------- Accessors ----------
 
@@ -406,32 +408,42 @@ void PlayTetris()
 		}
 		else 
 		{
-			// Handle piece gravity
-			for (int block = 0; block < PIECE_SIZE; block++)
+			if (_gravityTimer >= GRAVITY_TIMER)
 			{
-				// Save current piece
-				savedPiece[block] = currentPiece[block];
-
-				currentPiece[block].y += 1;
-			}
-			if(!checkPiecePos(currentPiece))
-			{
-				// Piece is at bottom
+				// Handle piece gravity
 				for (int block = 0; block < PIECE_SIZE; block++)
 				{
-					GetRow(savedPiece[block].y)->cols[savedPiece[block].y] = _currentPieceStatus;
+					// Save current piece
+					savedPiece[block] = currentPiece[block];
+
+					currentPiece[block].y += 1;
+				}
+				if(!checkPiecePos(currentPiece))
+				{
+					// Piece is at bottom
+					for (int block = 0; block < PIECE_SIZE; block++)
+					{
+						GetRow(savedPiece[block].y)->cols[savedPiece[block].y] = _currentPieceStatus;
+					}
+
+					// Insert base piece
+					int shape = rand() % 7;
+					// TODO add random color status
+					_currentPieceStatus = Default;
+					for (int block = 0; block < PIECE_SIZE; block++)
+					{
+						currentPiece[block].x = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
+						currentPiece[block].y = TETRIS_BOARD_COLS/2-1 + (pieceShapes[shape][block] / 2);
+					}
 				}
 
-				// Insert base piece
-				int shape = rand() % 7;
-				// TODO add random color status
-				_currentPieceStatus = Default;
-				for (int block = 0; block < PIECE_SIZE; block++)
-				{
-					currentPiece[block].x = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
-					currentPiece[block].y = TETRIS_BOARD_COLS/2-1 + (pieceShapes[shape][block] / 2);
-				}
+				_gravityTimer = 0;
 			}
+			else
+			{
+				_gravityTimer++;
+			}
+			
 
 			// Check if lines need to be cleared
 			int r = 0;
