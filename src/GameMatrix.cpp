@@ -1,4 +1,5 @@
 #include "led-matrix.h"
+#include "Tetris.h"
 
 #include "pixel-mapper.h"
 #include "graphics.h"
@@ -8,25 +9,11 @@
 #include <stdio.h>
 #include <iostream>
 #include <signal.h>
-#include <stdlib.h>
 #include <termios.h>
 
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
-
-// Tetris width always 10 wide
-#define TETRIS_BOARD_COLS 10
-#define TETRIS_BOARD_ROWS 12
-// How many pixels per Tetris block
-#define BLOCK_SIZE 5
-#define PIECE_SIZE 4
-#define BOARD_X_OFFSET 7
-#define BOARD_Y_OFFSET 4
-
-#define LINE_CLEAR_TARGET 50
-#define GRAVITY_UPDATE_TARGET 60
-#define GRAVITY_BOTTOM_TARGET 45
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -59,160 +46,6 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 	}
 }
 
-// ========== Tetris Stuff ==========
-// ---------- Struct & Fields ----------
-
-enum BlockStatus
-{
-	None,
-	Default,
-	Blue,
-	Pink
-};
-
-struct Row {
-	BlockStatus cols[TETRIS_BOARD_ROWS];
-	bool 		toClear;
-};
-
-struct PiecePos
-{
-	int x, y;
-};
-
-// TODO change from buffer to linked list
-
-static PiecePos currentPiece[PIECE_SIZE];
-static PiecePos savedPiece[PIECE_SIZE];
-
-static BlockStatus _currentPieceStatus;
-
-// Point of rotation is [?][1]
-// Based on following mapping:
-// 1 2 3 4
-//   5 6 7
-int pieceShapes[7][4] =
-{
-    1,3,5,7, // I
-    2,4,5,7, // Z
-    3,5,4,6, // S
-    3,5,4,7, // T
-    2,3,5,7, // L
-    3,5,7,6, // J
-    2,3,4,5, // O
-};
-
-static Row * TetrisBoard;
-static Color * _defaultColor;
-
-enum tetrisState 
-{
-	Normal,
-	ClearAnimation,
-	Clearing
-};
-static tetrisState _tState;
-
-enum rotateState
-{
-	NoRotate,
-	Clockwise,
-	CounterClockwise
-};
-static rotateState _rotateState;
-
-static int _gravityCount;
-static int _bottomCountTarget;
-static int _clearCount;
-
-// ---------- Helpers ----------
-
-static void UpdateDefaultColor()
-{
-	_defaultColor->g++;
-}
-
-static void copyLine(int src, int dest)
-{
-	for (int i = 0; i < TETRIS_BOARD_COLS; i++)
-	{
-		TetrisBoard[dest].cols[i] = TetrisBoard[src].cols[i];
-	}
-	TetrisBoard[dest].toClear = false;
-}
-
-static void ClearLines ()
-{
-	int lowestValidRow = 0;
-	for (int i = 0; i < TETRIS_BOARD_ROWS; i++)
-	{
-		if (!TetrisBoard[i].toClear)
-		{
-			// Move valid row to lowest row
-			if (lowestValidRow < i)
-			{
-				copyLine(i, lowestValidRow);
-			}
-			lowestValidRow++;
-		}
-	}
-
-	// Zero out rest of rows
-	for (;lowestValidRow < TETRIS_BOARD_ROWS; lowestValidRow++)
-	{
-		for (int i = 0; i < TETRIS_BOARD_COLS; i++)
-		{
-			TetrisBoard[lowestValidRow].cols[i] = None;
-			TetrisBoard[lowestValidRow].toClear = false;
-		}
-	}
-}
-
-// Check that all blocks of piece are in valid locations
-bool checkPiecePos(PiecePos *piece)
-{
-	for (int block = 0; block < PIECE_SIZE; block++)
-	{
-		// Within board
-		if (piece[block].x < 0 || piece[block].x >= TETRIS_BOARD_COLS ||
-			piece[block].y < 0 || piece[block].y >= TETRIS_BOARD_ROWS)
-		{
-			return false;
-		}
-		// Not on board block
-		else if (TetrisBoard[piece[block].y].cols[piece[block].x] != None)
-		{
-			return false;
-		}
-	}
-	return true;
-}
-
-// Reset next piece to current if pos invalid
-void checkCurrentPiecePos()
-{
-	if(!checkPiecePos(currentPiece))
-	{
-		for (int block = 0; block < PIECE_SIZE; block++)
-		{
-			currentPiece[block] = savedPiece[block];
-		}
-	}
-}
-
-static void addPiece()
-{
-	// Insert base piece
-	int shape = rand() % 7;
-	// TODO add random color status
-	_currentPieceStatus = Default;
-	for (int block = 0; block < PIECE_SIZE; block++)
-	{
-		currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
-		currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
-	}
-}
-
 // Check if there is any input on the unbuffered terminal
 bool inputAvailable()
 {
@@ -238,338 +71,7 @@ static char getch()
 	return buf;
 }
 
-// ---------- Game Functions ----------
-
-void InitTetris()
-{
-	TetrisBoard = (Row*)calloc(sizeof(Row), TETRIS_BOARD_ROWS);
-
-	int rows = TETRIS_BOARD_ROWS;
-	for (int y = rows - 1; y >= 0; y--)
-	{
-		std::cout << "Row " << y << ":\t";
-		for (int x = 0; x < TETRIS_BOARD_ROWS; x++)
-		{
-			std::cout << (TetrisBoard[y].cols[x] != None ? "1 " : "0 ");
-		}
-		std::cout << std::endl;
-	}
-
-	_tState = Normal;
-	_defaultColor = new Color(0, 0, 0);
-	_gravityCount = 0;
-	_bottomCountTarget = 0;
-	_clearCount = 0;
-
-	addPiece();
-}
-
-static void DrawTetris(RGBMatrix *matrix)
-{
-	FrameCanvas *canvas = matrix->CreateFrameCanvas();
-
-	UpdateDefaultColor();
-
-	for (int x = 0; x < canvas->width(); x++)
-	{
-		for (int y = 0; y < canvas->height(); y++)
-		{
-			if (interrupt_received)
-				return;
-
-			if ((x < BOARD_X_OFFSET || x > BOARD_X_OFFSET + (BLOCK_SIZE * TETRIS_BOARD_COLS)) ||
-				(y > canvas->height() - BOARD_Y_OFFSET - 1 || y < canvas->height() - BOARD_Y_OFFSET - 1 - (BLOCK_SIZE * TETRIS_BOARD_ROWS)))
-			{
-				// Draw border background
-				canvas->SetPixel(x, y, 108, 64, 173);
-			}
-			else
-			{
-				// Draw tetris board
-				int col = (x - BOARD_X_OFFSET) / BLOCK_SIZE;
-				int row = (canvas->height() - y - BOARD_Y_OFFSET - 1) / BLOCK_SIZE;
-
-				if (TetrisBoard[row].cols[col] == None)
-				{
-					// Draw board background or piece block
-					canvas->SetPixel(x, y, 0, 0, 0);
-					for (int block = 0; block < PIECE_SIZE; block++)
-					{
-						if (_tState != ClearAnimation && currentPiece[block].x == col && currentPiece[block].y == row)
-						{
-							int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
-							int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
-							if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
-							{
-								// Draw piece block border
-								canvas->SetPixel(x, y, 255, 25, 25);
-							}
-							else 
-							{
-								// Draw piece block
-								canvas->SetPixel(x, y, 100, 100, 100);
-							}
-							break;
-						}
-					}
-				}
-				else if (TetrisBoard[row].toClear)
-				{
-					// Draw clear line animation
-					uint shift = _clearCount * 3;
-					if (shift > 255)
-					{
-						shift = 0;
-					}
-					canvas->SetPixel(x, y, 255 - shift, 255 - shift, 255 - shift);
-				}
-				else
-				{
-					// Draw board block
-					int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
-					int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
-					
-					if (bX == 0 || bY == 0 || bX == BLOCK_SIZE - 1 || bY == BLOCK_SIZE - 1)
-					{
-						// Draw block border
-						Color *c = new Color(255, 255, 255);
-						switch(TetrisBoard[row].cols[col])
-						{
-							case Default:
-							{
-								c = _defaultColor;
-								break;
-							}
-							case Blue:
-							{
-								c->r = 38;
-								c->g = 48;
-								c->b = 195;
-								break;
-							}
-							case Pink:
-							{
-								c->r = 210;
-								c->g = 42;
-								c->b = 171;
-								break;
-							}
-							default:
-							case None:
-							{
-								break;
-							}
-						}
-						canvas->SetPixel(x, y, c->r, c->g, c->b);
-					}
-					else
-					{
-						canvas->SetPixel(x, y, 20, 20, 20);
-					}
-				}
-			}
-		}
-	}
-	matrix->SwapOnVSync(canvas, 2U);
-}
-
-void PlayTetris()
-{	
-	switch (_tState)
-	{
-		case Normal:
-		{
-			int xShift = 0;
-			int yshift = 0;
-			_rotateState = NoRotate;
-
-			// Capture Input
-			if (inputAvailable())
-			{
-				const char c = tolower(getch());
-				switch (c)
-				{
-					case 'w': // Up
-					case 'k':
-					{
-						// TODO drop
-						break;
-					}
-					case 's': // Down
-					case 'j':
-					{
-						yshift--;
-						break;
-					}
-					case 'a': // Left
-					case 'h':
-					{
-						xShift--;
-						break;
-					}
-					case 'd': // Right
-					case 'l':
-					{
-						xShift++;
-						break;
-					}
-					case 'q': // Rotate
-					{
-						_rotateState = CounterClockwise;
-						break;
-					}
-					case 'e': // Rotate
-					{
-						_rotateState = Clockwise;
-						break;
-					}
-					// Exit program
-					case 0x1B:           // Escape
-					case 0x04:           // End of file
-					case 0x00:           // Other issue from getch()
-					{
-						_running = false;
-						break;
-					}
-				}
-			}
-
-			// Handle move
-			for (int block = 0; block < PIECE_SIZE; block++)
-			{
-				// Save current piece
-				savedPiece[block] = currentPiece[block];
-
-				currentPiece[block].x += xShift;
-				currentPiece[block].y += yshift;
-			}
-			checkCurrentPiecePos();
-
-			// Handle rotate
-			if (_rotateState != NoRotate)
-			{
-				PiecePos rotationPos = currentPiece[1];
-				for (int block = 0; block < PIECE_SIZE; block++)
-				{
-					// Save current piece
-					savedPiece[block] = currentPiece[block];
-
-					int x = savedPiece[block].y - rotationPos.y;
-					int y = savedPiece[block].x - rotationPos.x;
-
-					// TODO Rotate not blocked by walls and height
-					switch (_rotateState)
-					{
-						case Clockwise:
-						{
-							// Transpose y distance from rotationPos to x axis
-							currentPiece[block].x = rotationPos.x + x;
-
-							// Transpose x distance from rotationPos to -y axis
-							currentPiece[block].y = rotationPos.y - y;
-							break;
-						}
-						case CounterClockwise:
-						{
-							// Transpose y distance from rotationPos to -x axis
-							currentPiece[block].x = rotationPos.x - x;
-
-							// Transpose x distance from rotationPos to y axis
-							currentPiece[block].y = rotationPos.y + y;
-							break;
-						}
-						case NoRotate:
-						{
-							break;
-						}
-					}
-				}
-				checkCurrentPiecePos();
-				_rotateState = NoRotate;
-			}
-
-			if (_gravityCount++ % GRAVITY_UPDATE_TARGET == 0)
-			{
-				// Handle piece gravity
-				for (int block = 0; block < PIECE_SIZE; block++)
-				{
-					// Save current piece
-					savedPiece[block] = currentPiece[block];
-
-					currentPiece[block].y -= 1;
-				}
-				if(!checkPiecePos(currentPiece))
-				{	
-					if(_gravityCount >= _bottomCountTarget)
-					{
-						// Piece is at bottom
-						for (int block = 0; block < PIECE_SIZE; block++)
-						{
-							TetrisBoard[savedPiece[block].y].cols[savedPiece[block].x] = _currentPieceStatus;
-						}
-
-						addPiece();
-					}
-					else
-					{
-						_bottomCountTarget = _gravityCount + _bottomCountTarget;
-
-						// Reset piece
-						for (int block = 0; block < PIECE_SIZE; block++)
-						{
-							currentPiece[block] = savedPiece[block];
-						}
-					}
-				}
-
-				// Check if lines need to be cleared
-				for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
-				{
-					for (int c = 0; c < TETRIS_BOARD_COLS; c++)
-					{
-						if (TetrisBoard[r].cols[c] == None)
-						{
-							// Gap found in line
-							break;
-						}
-						if (c == TETRIS_BOARD_COLS - 1)
-						{
-							// Line marked to be cleared
-							_tState = ClearAnimation;
-							TetrisBoard[r].toClear = true;
-						}
-					}
-				}
-			}
-			break;
-		}
-		case ClearAnimation:
-		{
-			if (_clearCount++ >= LINE_CLEAR_TARGET)
-			{
-				// Mark the end of the line clearing stage
-				_clearCount = 0;
-				_tState = Clearing;
-			}
-			break;
-		}
-		case Clearing:
-		{
-			ClearLines();
-			_tState = Normal;
-			break;
-		}
-	}
-}
-
-void CleanupTetris()
-{
-	free(TetrisBoard);
-}
-
 int main(int argc, char *argv[]) {
-	InitTetris();
-
 	RGBMatrix::Options defaults;
 	defaults.hardware_mapping = "adafruit-hat-pwm";
 	defaults.rows = 32;
@@ -586,8 +88,8 @@ int main(int argc, char *argv[]) {
 	rtOptions.gpio_slowdown = 3;
 	rtOptions.drop_privileges = 0;
 
-	rtOptions.daemon = 0; 			// Set to 1 for production
-	rtOptions.do_gpio_init = true; 	// Set to false for debugging on pc
+	rtOptions.daemon = 0;
+	rtOptions.do_gpio_init = true;
 
 	RGBMatrix *matrix = RGBMatrix::CreateFromOptions(defaults, rtOptions);
 	if (matrix == NULL)
@@ -601,6 +103,8 @@ int main(int argc, char *argv[]) {
 	signal(SIGINT, InterruptHandler);
 
 	_running = true;
+
+	Tetris *t = new Tetris();
 
 	// StartUp Animation
 	DrawOnCanvas(matrix);
@@ -624,8 +128,14 @@ int main(int argc, char *argv[]) {
 	// Tetris Engine
 	while (!interrupt_received && _running)
 	{
-		PlayTetris();
-		DrawTetris(matrix);
+		volatile char c = 0x00;
+		if (inputAvailable())
+		{
+			c = tolower(getch());
+		}
+
+		t->PlayTetris(c);
+		t->DrawTetris(matrix);
 	}
 
 	// Restore terminal attributes
@@ -634,7 +144,6 @@ int main(int argc, char *argv[]) {
 		perror ("tcsetattr ~ICANON");
 	}
 
-	CleanupTetris();
 	delete matrix;
 
 	return 0;

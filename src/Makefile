@@ -1,6 +1,6 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
 CXXFLAGS=$(CFLAGS)
-OBJECTS=GameMatrix.o
+OBJECTS=GameMatrix.o Tetris.o
 BINARIES=GameMatrix.app
 
 # Where our library resides. You mostly only need to change the
@@ -14,13 +14,13 @@ LDFLAGS+=-L$(RGB_LIBDIR) -l$(RGB_LIBRARY_NAME) -lrt -lm -lpthread
 
 all : $(BINARIES)
 
-$(RGB_LIBRARY): FORCE
+$(RGB_LIBRARY) : FORCE
 	$(MAKE) -C $(RGB_LIBDIR)
 
-GameMatrix.app : GameMatrix.o $(RGB_LIBRARY)
-	$(CXX) $< -o $@ $(LDFLAGS)
+GameMatrix.app : $(OBJECTS) $(RGB_LIBRARY) 
+	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
-# All the binaries that have the same name as the object file.q
+# All the binaries that have the same name as the object file.
 % : %.o $(RGB_LIBRARY)
 	$(CXX) $< -o $@ $(LDFLAGS)
 
