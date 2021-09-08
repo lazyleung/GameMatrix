@@ -103,7 +103,7 @@ class Tetris
         void InitTetris();
         void CleanupTetris();
 
-        void UpdateDefaultColor();
+        void UpdateDefaultColorShift();
 
         void DrawTetris(RGBMatrix *matrix);
         void PlayTetris(volatile char c);

@@ -25,15 +25,17 @@ uint8_t Tetris::scale_col(int val, int lo, int hi) {
 
 Color * Tetris::getDefaultColor(int x, int y, Canvas *c)
 {
-    if (++_defaultColorShift >= c->width())
-    {
-        _defaultColorShift = 0;
-    }
+    int shift = _defaultColorShift % c->width();
     return new Color(
-        scale_col(x + _defaultColorShift, 0, c->width()),
-        255 - scale_col(y - _defaultColorShift, 0, c->width()),
-        scale_col(y - _defaultColorShift, 0, c->width())
+        scale_col(x + shift, 0, c->width()),
+        255 - scale_col(y - shift, 0, c->height()),
+        scale_col(y - shift, 0, c->height())
     );
+}
+
+void Tetris::UpdateDefaultColorShift()
+{
+    _defaultColorShift++;
 }
 
 // Copy board line from src row to dest row
@@ -167,6 +169,8 @@ Tetris::~Tetris()
 void Tetris::DrawTetris(RGBMatrix *matrix)
 {
 	FrameCanvas *canvas = matrix->CreateFrameCanvas();
+
+    UpdateDefaultColorShift();
 
 	for (int x = 0; x < canvas->width(); x++)
 	{
