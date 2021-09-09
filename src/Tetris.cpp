@@ -124,8 +124,8 @@ void Tetris::addPiece()
     bool isPieceSelected = false;
     while (!isPieceSelected)
     {
-        std::cout << "Shape " << shape << "";
-        if (shape >= 7 && (pieceBag & (0x01 << shape)))
+        std::cout << "Shape " << shape << " ";
+        if (shape >= 7 && (pieceBag & (0x01 << shape) != 0x00))
         {
             // Piece already in bag
             shape = rand() % 7;
