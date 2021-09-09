@@ -34,7 +34,7 @@ class Tetris
             Blue,
             Pink
         };
-        BlockStatus _currentPieceStatus;
+        BlockStatus currentPieceStatus;
 
         enum tetrisState 
         {
@@ -42,7 +42,7 @@ class Tetris
             ClearAnimation,
             Clearing
         };
-        tetrisState _tState;
+        tetrisState tState;
 
         enum rotateState
         {
@@ -50,7 +50,7 @@ class Tetris
             Clockwise,
             CounterClockwise
         };
-        rotateState _rotateState;
+        rotateState rotateState;
 
         struct Row {
             BlockStatus cols[TETRIS_BOARD_ROWS];
@@ -82,11 +82,12 @@ class Tetris
         uint8_t pieceBag;
 
         Row * tetrisBoard;
-        int _defaultColorShift;
+        int defaultColorShift;
+        bool isShiftInc;
 
-        int _gravityCount;
-        int _bottomCountTarget;
-        int _clearCount;
+        int gravityCount;
+        int bottomCountTarget;
+        int clearCount;
 
         uint8_t scale_col(int val, int lo, int hi);
         Color * getDefaultColor(int x, int y, Canvas *c);
