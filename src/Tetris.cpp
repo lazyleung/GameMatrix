@@ -115,9 +115,9 @@ void Tetris::addPiece()
 {
     // Insert base piece
 
-    if (pieceBag == 0xFF)
+    if (pieceBag == 0xFFu)
     {
-        pieceBag = 0x80;
+        pieceBag = 0x80u;
     }
 
     // Bit 7 is always 1 in pieceBag
@@ -152,7 +152,7 @@ void Tetris::addPiece()
 
 void Tetris::clearPieceBag()
 {
-    pieceBag = 0x80;
+    pieceBag = 0x80u;
 }
 
 // ---------- Constructors and Destructors ----------
