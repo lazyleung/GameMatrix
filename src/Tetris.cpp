@@ -85,7 +85,7 @@ bool Tetris::checkPiecePos(PiecePos *piece)
     {
         // Within board
         if (piece[block].x < 0 || piece[block].x >= TETRIS_BOARD_COLS ||
-            piece[block].y < 0 || piece[block].y >= TETRIS_BOARD_ROWS)
+            piece[block].y < 0 || piece[block].y >= TETRIS_BOARD_ROWS + TETRIS_BOARD_ROWS_HIDDEN)
         {
             return false;
         }
@@ -114,14 +114,45 @@ void Tetris::checkCurrentPiecePos()
 void Tetris::addPiece()
 {
     // Insert base piece
-    int shape = rand() % 7;
+
+    if (pieceBag == 0xFF)
+    {
+        pieceBag = 0x80;
+    }
+
+    // Bit 7 is always 1 in pieceBag
+    // so shape always gets updated
+    int shape = 7;
+    bool isPieceSelected = false;
+    while (!isPieceSelected)
+    {
+        if (pieceBag & (1 << shape))
+        {
+            // Piece already in bag
+            shape = rand() % 7;
+        }
+        else
+        {
+            // Piece valid!
+            isPieceSelected = true;
+            pieceBag = pieceBag | (1 << shape);
+        }
+    }
+
+    std::cout << "PieceBag: " << std::hex << (0xFF & pieceBag) << std::endl;
+
     // TODO add random color status
     _currentPieceStatus = Default;
     for (int block = 0; block < PIECE_SIZE; block++)
     {
-        currentPiece[block].y = TETRIS_BOARD_ROWS-1 - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
+        currentPiece[block].y = TETRIS_BOARD_ROWS - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
         currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
     }
+}
+
+void Tetris::clearPieceBag()
+{
+    pieceBag = 0x80;
 }
 
 // ---------- Constructors and Destructors ----------

@@ -79,6 +79,8 @@ class Tetris
             2,3,4,5, // O
         };
 
+        uint8_t pieceBag;
+
         Row * tetrisBoard;
         int _defaultColorShift;
 
@@ -95,6 +97,7 @@ class Tetris
         bool checkPiecePos(PiecePos *piece);
         void checkCurrentPiecePos();
         void addPiece();
+        void clearPieceBag();
 
     public:
         Tetris(/* args */);
