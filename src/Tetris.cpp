@@ -83,14 +83,14 @@ bool Tetris::checkPiecePos(PiecePos *piece)
 {
     for (int block = 0; block < PIECE_SIZE; block++)
     {
-        // Within board
+        // Check if within board
         if (piece[block].x < 0 || piece[block].x >= TETRIS_BOARD_COLS ||
             piece[block].y < 0 || piece[block].y >= TETRIS_BOARD_ROWS + TETRIS_BOARD_ROWS_HIDDEN)
         {
             return false;
         }
         // Not on board block
-        else if (tetrisBoard[piece[block].y].cols[piece[block].x] != None)
+        else if (piece[block].y < TETRIS_BOARD_ROWS && tetrisBoard[piece[block].y].cols[piece[block].x] != None)
         {
             return false;
         }
