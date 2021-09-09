@@ -115,18 +115,17 @@ void Tetris::addPiece()
 {
     // Insert base piece
 
-    if (pieceBag == 0xFFu)
+    if (pieceBag == 0xFF)
     {
-        pieceBag = 0x80u;
+        pieceBag = 0x80;
     }
 
-    // Bit 7 is always 1 in pieceBag
-    // so shape always gets updated
     int shape = 7;
     bool isPieceSelected = false;
     while (!isPieceSelected)
     {
-        if (pieceBag & (1 << shape))
+        std::cout << "Shape " << shape;
+        if (shape >= 7 && (pieceBag & (1 << shape)))
         {
             // Piece already in bag
             shape = rand() % 7;
@@ -152,7 +151,7 @@ void Tetris::addPiece()
 
 void Tetris::clearPieceBag()
 {
-    pieceBag = 0x80u;
+    pieceBag = 0x80;
 }
 
 // ---------- Constructors and Destructors ----------
