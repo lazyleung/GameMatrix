@@ -177,6 +177,7 @@ void Tetris::InitTetris()
 	_bottomCountTarget = 0;
 	_clearCount = 0;
 
+    srand(time(NULL));
     clearPieceBag();
 	addPiece();
 }
