@@ -37,13 +37,27 @@ Color * Tetris::getDefaultColor(int x, int y, Canvas *c)
 
 void Tetris::UpdateDefaultColorShift()
 {
-    if (isShiftInc && defaultColorShift < 255)
+    if (isShiftInc)
     {
-        defaultColorShift++;
+        if (defaultColorShift < 255)
+        {
+            defaultColorShift++;
+        }
+        else
+        {
+            isShiftInc = false;
+        }
     }
-    else if (!isShiftInc && defaultColorShift > 0)
+    else
     {
-        defaultColorShift--;
+        if (defaultColorShift > 0)
+        {
+            defaultColorShift--;
+        }
+        else
+        {
+            isShiftInc = true;
+        }
     }
 }
 
@@ -131,7 +145,7 @@ void Tetris::addPiece()
     bool isPieceSelected = false;
     while (!isPieceSelected)
     {
-        std::cout << "Shape " << shape << " ";
+        // std::cout << "Shape " << shape << " ";
         if (shape >= 7 || (pieceBag & (0x01 << shape)))
         {
             // Piece already in bag
@@ -145,7 +159,7 @@ void Tetris::addPiece()
         }
     }
 
-    std::cout << "PieceBag: " << std::hex << (0xFF & pieceBag) << std::endl;
+    // std::cout << "PieceBag: " << std::hex << (0xFF & pieceBag) << std::endl;
 
     // TODO add random color status
     currentPieceStatus = Default;
