@@ -15,12 +15,12 @@ uint8_t Tetris::scale_col(int val, int lo, int hi) {
     if (val <= lo) 
     {
         return 0;
-        //val += hi;
+        // val += hi;
     }
     if (val >= hi)
     {
-        return 255;
-        //val += lo - hi;
+         return 255;
+        // val += lo - hi;
     }
     return 255 * (val - lo) / (hi - lo);
 }
