@@ -183,8 +183,11 @@ void Tetris::InitTetris()
 
 void Tetris::CleanupTetris()
 {
-    free(tetrisBoard);
-    tetrisBoard = NULL;
+    if (tetrisBoard != NULL)
+    {
+        free(tetrisBoard);
+        tetrisBoard = NULL;
+    }
 }
 
 Tetris::Tetris(/* args */)
