@@ -78,7 +78,7 @@ bool inputAvailable()
 
 static char getArcadeInput()
 {
-	int input;
+	int i, input;
 	for (i = 0; i < 4; i++)
 	{
 			input = digitalRead(GPIO_OFFSET + i);
