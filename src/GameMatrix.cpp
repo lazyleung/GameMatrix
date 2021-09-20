@@ -66,7 +66,7 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 // 	FD_SET(STDIN_FILENO, &fds);
 // 	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
 // 	return (FD_ISSET(0, &fds));
-}
+// }
 
 // Get single char
 // static char getch() 
