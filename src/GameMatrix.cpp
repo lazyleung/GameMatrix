@@ -117,6 +117,7 @@ static char getArcadeInput()
 
 static void inputHandler() 
 {
+	std::cout << "Button Press!" << std::endl;
 	inputC = 'q';
 }
 
@@ -164,9 +165,9 @@ int main(int argc, char *argv[]) {
 	// Buttons
 	for (; i < 3; i++)
 	{
-			wiringPiISR (GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandler) ;
+			wiringPiISR(GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandler) ;
 			//pinMode(GPIO_OFFSET + i, INPUT);
-			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
+			//pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
 	}
 
 	_running = true;
