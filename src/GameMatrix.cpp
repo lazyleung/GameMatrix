@@ -121,6 +121,12 @@ static void inputHandler()
 	inputC = 'q';
 }
 
+static void inputHandlerJoystick() 
+{
+	std::cout << "Joystick Press!" << std::endl;
+	inputC = 'a';
+}
+
 int main(int argc, char *argv[]) {
 	RGBMatrix::Options defaults;
 	defaults.hardware_mapping = "adafruit-hat-pwm";
@@ -158,8 +164,9 @@ int main(int argc, char *argv[]) {
 	int i;
 	for (i = 0; i < 4; i++)
 	{
-			pinMode(GPIO_OFFSET + i, INPUT);
-			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
+			wiringPiISR(GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandlerJoystick) ;
+			// pinMode(GPIO_OFFSET + i, INPUT);
+			// pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
 	}
 
 	// Buttons
