@@ -88,16 +88,16 @@ static char getArcadeInput()
 					switch (i)
 					{
 					case 0:
-						return 's';
+						return 'a';
 						break;
 					case 1:
-						return 'w';
-						break;
-					case 2:
 						return 'd';
 						break;
+					case 2:
+						return 'w';
+						break;
 					case 3:
-						return 'a';
+						return 's';
 						break;
 					default:
 						break;
