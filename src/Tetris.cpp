@@ -330,7 +330,7 @@ void Tetris::DrawTetris(RGBMatrix *matrix)
     matrix->SwapOnVSync(canvas, 2U);
 }
 
-void Tetris::PlayTetris(volatile char inputC)
+void Tetris::PlayTetris(volatile char *inputC)
 {    
     switch (tState)
     {
@@ -343,7 +343,7 @@ void Tetris::PlayTetris(volatile char inputC)
             // Capture Input
             if (inputC != 0x00)
             {
-                switch (inputC)
+                switch (*inputC)
                 {
                     case 'w': // Up
                     case 'k':
@@ -389,6 +389,7 @@ void Tetris::PlayTetris(volatile char inputC)
                         break;
                     }
                 }
+                *inputC = 0x00;
             }
 
             // Handle move

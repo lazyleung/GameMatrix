@@ -27,6 +27,8 @@ static void InterruptHandler(int signo) {
 
 static bool _running;
 
+volatile char inputC = 0x00;
+
 static void DrawOnCanvas(RGBMatrix *matrix) {
 	/*
 	* Let's create a simple animation. We use the canvas to draw
@@ -52,18 +54,18 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 }
 
 // Check if there is any input on the unbuffered terminal
-bool inputAvailable()
-{
-	std::cin.clear();
+// bool inputAvailable()
+// {
+// 	std::cin.clear();
 	
-	struct timeval tv;
-	fd_set fds;
-	tv.tv_sec = 0;
-	tv.tv_usec = 0;
-	FD_ZERO(&fds);
-	FD_SET(STDIN_FILENO, &fds);
-	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
-	return (FD_ISSET(0, &fds));
+// 	struct timeval tv;
+// 	fd_set fds;
+// 	tv.tv_sec = 0;
+// 	tv.tv_usec = 0;
+// 	FD_ZERO(&fds);
+// 	FD_SET(STDIN_FILENO, &fds);
+// 	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+// 	return (FD_ISSET(0, &fds));
 }
 
 // Get single char
@@ -113,6 +115,11 @@ static char getArcadeInput()
 	return 0x00;
 }
 
+static void inputHandler() 
+{
+	inputC = 'q';
+}
+
 int main(int argc, char *argv[]) {
 	RGBMatrix::Options defaults;
 	defaults.hardware_mapping = "adafruit-hat-pwm";
@@ -157,10 +164,10 @@ int main(int argc, char *argv[]) {
 	// Buttons
 	for (; i < 3; i++)
 	{
-			pinMode(GPIO_OFFSET + i, INPUT);
+			wiringPiISR (GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandler) ;
+			//pinMode(GPIO_OFFSET + i, INPUT);
 			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
 	}
-
 
 	_running = true;
 
@@ -193,10 +200,10 @@ int main(int argc, char *argv[]) {
 		// {
 		// 	//c = tolower(getch());
 		// }
-		volatile char c = getArcadeInput();
 
+		//volatile char c = getArcadeInput();
 
-		t->PlayTetris(c);
+		t->PlayTetris(&inputC);
 		t->DrawTetris(matrix);
 	}
 
