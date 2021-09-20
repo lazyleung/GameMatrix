@@ -110,6 +110,7 @@ static char getArcadeInput()
 			std::cout << "Button (Pin " << GPIO_OFFSET + i << ")" <<  std::endl;
 			return 'q';
 	}
+	return 0x00;
 }
 
 int main(int argc, char *argv[]) {
@@ -187,12 +188,12 @@ int main(int argc, char *argv[]) {
 	// Tetris Engine
 	while (!interrupt_received && _running)
 	{
-		volatile char c = 0x00;
+		// volatile char c = 0x00;
 		// if (inputAvailable())
 		// {
 		// 	//c = tolower(getch());
 		// }
-		c = getArcadeInput();
+		volatile char c = getArcadeInput();
 
 
 		t->PlayTetris(c);
