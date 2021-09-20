@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
 		// {
 		// 	//c = tolower(getch());
 		// }
-
+		getArcadeInput();
 
 
 		t->PlayTetris(c);
