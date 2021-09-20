@@ -11,6 +11,11 @@
 #include <signal.h>
 #include <termios.h>
 
+#include <wiringPi.h>
+#include <mcp23017.h>
+
+#define GPIO_OFFSET 64
+
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
@@ -62,13 +67,49 @@ bool inputAvailable()
 }
 
 // Get single char
-static char getch() 
-{
-	char buf = 0;
-	if (read(STDIN_FILENO, &buf, 1) < 0)
-		perror ("read()");
+// static char getch() 
+// {
+// 	char buf = 0;
+// 	if (read(STDIN_FILENO, &buf, 1) < 0)
+// 		perror ("read()");
 
-	return buf;
+// 	return buf;
+// }
+
+static char getArcadeInput()
+{
+	int input;
+	for (i = 0; i < 4; i++)
+	{
+			input = digitalRead(GPIO_OFFSET + i);
+			if (input == 0)
+			{
+					std::cout << "Joystick (Pin " << GPIO_OFFSET + i << ")" << std::endl;
+					switch (i)
+					{
+					case 0:
+						return 'w';
+						break;
+					case 1:
+						return 'a';
+						break;
+					case 2:
+						return 's';
+						break;
+					case 3:
+						return 'd';
+						break;
+					default:
+						break;
+					}
+			}
+	}
+	input = digitalRead(GPIO_OFFSET + i);
+	if (input == 0)
+	{
+			std::cout << "Button (Pin " << GPIO_OFFSET + i << ")" <<  std::endl;
+			return 'q';
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -102,6 +143,24 @@ int main(int argc, char *argv[]) {
 	signal(SIGTERM, InterruptHandler);
 	signal(SIGINT, InterruptHandler);
 
+	wiringPiSetup();
+	mcp23017Setup(GPIO_OFFSET, 0x20);
+	// Stick
+	int i;
+	for (i = 0; i < 4; i++)
+	{
+			pinMode(GPIO_OFFSET + i, INPUT);
+			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
+	}
+
+	// Buttons
+	for (; i < 3; i++)
+	{
+			pinMode(GPIO_OFFSET + i, INPUT);
+			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
+	}
+
+
 	_running = true;
 
 	Tetris *t = new Tetris();
@@ -110,39 +169,41 @@ int main(int argc, char *argv[]) {
 	DrawOnCanvas(matrix);
 
 	// Set terminal to unbuffered mode
-	struct termios old;
-	bool is_terminal = isatty(STDIN_FILENO);
-	if (is_terminal) {
-		if (tcgetattr(0, &old) < 0)
-			perror("tcsetattr()");
+	// struct termios old;
+	// bool is_terminal = isatty(STDIN_FILENO);
+	// if (is_terminal) {
+	// 	if (tcgetattr(0, &old) < 0)
+	// 		perror("tcsetattr()");
 
-		struct termios no_echo = old;
-		no_echo.c_lflag &= ~ICANON;
-		no_echo.c_lflag &= ~ECHO;
-		no_echo.c_cc[VMIN] = 1;
-		no_echo.c_cc[VTIME] = 0;
-		if (tcsetattr(0, TCSANOW, &no_echo) < 0)
-			perror("tcsetattr ICANON");
-	}
+	// 	struct termios no_echo = old;
+	// 	no_echo.c_lflag &= ~ICANON;
+	// 	no_echo.c_lflag &= ~ECHO;
+	// 	no_echo.c_cc[VMIN] = 1;
+	// 	no_echo.c_cc[VTIME] = 0;
+	// 	if (tcsetattr(0, TCSANOW, &no_echo) < 0)
+	// 		perror("tcsetattr ICANON");
+	// }
 
 	// Tetris Engine
 	while (!interrupt_received && _running)
 	{
 		volatile char c = 0x00;
-		if (inputAvailable())
-		{
-			c = tolower(getch());
-		}
+		// if (inputAvailable())
+		// {
+		// 	//c = tolower(getch());
+		// }
+
+
 
 		t->PlayTetris(c);
 		t->DrawTetris(matrix);
 	}
 
 	// Restore terminal attributes
-	if (is_terminal) {
-		if (tcsetattr(0, TCSADRAIN, &old) < 0)
-		perror ("tcsetattr ~ICANON");
-	}
+	// if (is_terminal) {
+	// 	if (tcsetattr(0, TCSADRAIN, &old) < 0)
+	// 	perror ("tcsetattr ~ICANON");
+	// }
 
 	delete matrix;
 
