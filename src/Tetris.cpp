@@ -456,6 +456,7 @@ void Tetris::PlayTetris(volatile bool *inputs)
                 rotateState = NoRotate;
             }
 
+            // Update gravity and check the board at set intervals
             if (gravityCount++ % GRAVITY_UPDATE_TARGET == 0)
             {
                 // Handle piece gravity
@@ -467,20 +468,28 @@ void Tetris::PlayTetris(volatile bool *inputs)
                     currentPiece[block].y -= 1;
                 }
                 if(!checkPiecePos(currentPiece))
-                {    
-                    if(gravityCount >= bottomCountTarget)
+                {
+                    // Piece has hit a block
+                    if(bottomCountTarget >= GRAVITY_BOTTOM_TARGET)
                     {
-                        // Piece is at bottom
+                        // Save piece location
                         for (int block = 0; block < PIECE_SIZE; block++)
                         {
                             tetrisBoard[savedPiece[block].y].cols[savedPiece[block].x] = currentPieceStatus;
                         }
 
                         addPiece();
+
+                        // Add input delay
+                        for (int i = 0; i < TOTAL_INPUTS; i++)
+                        {
+                            inputDelayCounts[i] = INPUT_DELAY_TARGET;
+                        } 
                     }
                     else
                     {
-                        bottomCountTarget = gravityCount + bottomCountTarget;
+                        // Delay before piece get's saved to block
+                        bottomCountTarget++;
 
                         // Reset piece
                         for (int block = 0; block < PIECE_SIZE; block++)
@@ -536,11 +545,6 @@ void Tetris::PlayTetris(volatile bool *inputs)
         }
         case Clearing:
         {
-            for (int i = 0; i < TOTAL_INPUTS; i++)
-            {
-                inputDelayCounts[i] = INPUT_DELAY_TARGET;
-            } 
-
             clearLines();
             tState = Normal;
             break;

@@ -19,7 +19,7 @@
 #define INPUT_DELAY_TARGET 5
 #define LINE_CLEAR_TARGET 50
 #define GRAVITY_UPDATE_TARGET 60
-#define GRAVITY_BOTTOM_TARGET 45
+#define GRAVITY_BOTTOM_TARGET 2
 
 using namespace rgb_matrix;
 
