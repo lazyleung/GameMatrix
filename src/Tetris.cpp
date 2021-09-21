@@ -155,6 +155,7 @@ void Tetris::getNextShape()
         }
     }
     nextShape = shape;
+    return;
 }
 
 // Add next piece to board
