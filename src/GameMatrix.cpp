@@ -28,7 +28,7 @@ static void InterruptHandler(int signo) {
 
 static bool _running;
 
-volatile char inputC = 0x00;
+static bool oldInputs[TOTAL_INPUTS;
 volatile bool inputs[TOTAL_INPUTS];
 
 static void DrawOnCanvas(RGBMatrix *matrix) {
@@ -86,48 +86,14 @@ static void getArcadeInput()
 	for (i = 0; i < TOTAL_INPUTS; i++)
 	{
 		input = digitalRead(GPIO_OFFSET + i);
-		if (input == 0)
+
+		if (oldInputs[i] == true)
 		{
 			inputs[i] = true;
-			// switch (i)
-			// {
-			// 	case 0:
-			// 		// left joystick
-			// 		return 'a';
-			// 		break;
-			// 	case 1:
-			// 		// right joystick
-			// 		return 'd';
-			// 		break;
-			// 	case 2:
-			// 		// up joystick
-			// 		return 'w';
-			// 		break;
-			// 	case 3:
-			// 		// down joystick
-			// 		return 's';
-			// 		break;
-			// 	case 4:
-			// 		// button 1
-			// 		return 'q';
-			// 		break;
-			// 	default:
-			// 		break;
-			// }
 		}
+
+		oldInputs[i] = input;
 	}
-}
-
-static void inputHandler() 
-{
-	std::cout << "Button Press!" << std::endl;
-	inputC = 'q';
-}
-
-static void inputHandlerJoystick() 
-{
-	std::cout << "Joystick Press!" << std::endl;
-	inputC = 'a';
 }
 
 int main(int argc, char *argv[]) {
