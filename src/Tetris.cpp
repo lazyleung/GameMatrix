@@ -236,7 +236,7 @@ void Tetris::DrawTetris(RGBMatrix *matrix)
     {
         for (int y = 0; y < canvas->height(); y++)
         {
-            if ((x < BOARD_X_OFFSET || x > BOARD_X_OFFSET + (BLOCK_SIZE * TETRIS_BOARD_COLS)) ||
+            if ((x < BOARD_X_OFFSET || x > BOARD_X_OFFSET - 1 + (BLOCK_SIZE * TETRIS_BOARD_COLS)) ||
                 (y > canvas->height() - BOARD_Y_OFFSET - 1 || y < canvas->height() - BOARD_Y_OFFSET - 1 - (BLOCK_SIZE * TETRIS_BOARD_ROWS)))
             {
                 // Draw border background
