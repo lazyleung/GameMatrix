@@ -1,5 +1,6 @@
 #include "led-matrix.h"
 #include "Tetris.h"
+#include "Inputs.h"
 
 #include "pixel-mapper.h"
 #include "graphics.h"
@@ -28,6 +29,7 @@ static void InterruptHandler(int signo) {
 static bool _running;
 
 volatile char inputC = 0x00;
+volatile bool inputs[TOTAL_INPUTS];
 
 static void DrawOnCanvas(RGBMatrix *matrix) {
 	/*
@@ -78,41 +80,42 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 // 	return buf;
 // }
 
-static char getArcadeInput()
+static void getArcadeInput()
 {
 	int i, input;
-	for (i = 0; i < 4; i++)
+	for (i = 0; i < TOTAL_INPUTS; i++)
 	{
-			input = digitalRead(GPIO_OFFSET + i);
-			if (input == 0)
-			{
-					std::cout << "Joystick (Pin " << GPIO_OFFSET + i << ")" << std::endl;
-					switch (i)
-					{
-					case 0:
-						return 'a';
-						break;
-					case 1:
-						return 'd';
-						break;
-					case 2:
-						return 'w';
-						break;
-					case 3:
-						return 's';
-						break;
-					default:
-						break;
-					}
-			}
+		input = digitalRead(GPIO_OFFSET + i);
+		if (input == 0)
+		{
+			inputs[i] = true;
+			// switch (i)
+			// {
+			// 	case 0:
+			// 		// left joystick
+			// 		return 'a';
+			// 		break;
+			// 	case 1:
+			// 		// right joystick
+			// 		return 'd';
+			// 		break;
+			// 	case 2:
+			// 		// up joystick
+			// 		return 'w';
+			// 		break;
+			// 	case 3:
+			// 		// down joystick
+			// 		return 's';
+			// 		break;
+			// 	case 4:
+			// 		// button 1
+			// 		return 'q';
+			// 		break;
+			// 	default:
+			// 		break;
+			// }
+		}
 	}
-	input = digitalRead(GPIO_OFFSET + i);
-	if (input == 0)
-	{
-			std::cout << "Button (Pin " << GPIO_OFFSET + i << ")" <<  std::endl;
-			return 'q';
-	}
-	return 0x00;
 }
 
 static void inputHandler() 
@@ -162,6 +165,7 @@ int main(int argc, char *argv[]) {
 	mcp23017Setup(GPIO_OFFSET, 0x20);
 	// Stick
 	int i;
+	int j;
 	for (i = 0; i < 4; i++)
 	{
 			wiringPiISR(GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandlerJoystick) ;
@@ -170,7 +174,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Buttons
-	for (; i < 3; i++)
+	for (j = 0; j < 3; j++, i++)
 	{
 			wiringPiISR(GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandler) ;
 			//pinMode(GPIO_OFFSET + i, INPUT);
@@ -209,9 +213,9 @@ int main(int argc, char *argv[]) {
 		// 	//c = tolower(getch());
 		// }
 
-		//volatile char c = getArcadeInput();
-
-		t->PlayTetris(&inputC);
+		getArcadeInput();
+		
+		t->PlayTetris(inputs);
 		t->DrawTetris(matrix);
 	}
 

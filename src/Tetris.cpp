@@ -1,4 +1,5 @@
 #include "Tetris.h"
+#include "Inputs.h"
 
 #include "led-matrix.h"
 #include "graphics.h"
@@ -330,7 +331,7 @@ void Tetris::DrawTetris(RGBMatrix *matrix)
     matrix->SwapOnVSync(canvas, 2U);
 }
 
-void Tetris::PlayTetris(volatile char *inputC)
+void Tetris::PlayTetris(volatile bool *inputs)
 {    
     switch (tState)
     {
@@ -338,59 +339,84 @@ void Tetris::PlayTetris(volatile char *inputC)
         {
             int xShift = 0;
             int yshift = 0;
-            rotateState = NoRotate;
+            rotateState = NoRotate; 
+
+            if (inputs[Left] && !inputs[Up] && !inputs[Down])
+            {
+                xShift--;
+            }
+
+            if (inputs[Right] && !inputs[Up] && !inputs[Down])
+            {
+                xShift++;
+            }
+
+            if (inputs[Down] && !inputs[Left] && !inputs[Right])
+            {
+                yshift--;
+            }
+
+            if (inputs[A])
+            {
+                 rotateState = CounterClockwise;
+            }
+
+            for (int i = 0; i < TOTAL_INPUTS; i++)
+            {
+                inputs[i] = false;
+            }
 
             // Capture Input
-            if (inputC != 0x00)
-            {
-                switch (*inputC)
-                {
-                    case 'w': // Up
-                    case 'k':
-                    {
-                        // TODO drop
-                        break;
-                    }
-                    case 's': // Down
-                    case 'j':
-                    {
-                        yshift--;
-                        break;
-                    }
-                    case 'a': // Left
-                    case 'h':
-                    {
-                        xShift--;
-                        break;
-                    }
-                    case 'd': // Right
-                    case 'l':
-                    {
-                        xShift++;
-                        break;
-                    }
-                    case 'q': // Rotate
-                    {
-                        rotateState = CounterClockwise;
-                        break;
-                    }
-                    case 'e': // Rotate
-                    {
-                        rotateState = Clockwise;
-                        break;
-                    }
-                    // Exit program
-                    case 0x1B:           // Escape
-                    case 0x04:           // End of file
-                    //case 0x00:           // Other issue from getch()
-                    {
-                        // TODO Sent signal to end program
-                        // _running = false;
-                        break;
-                    }
-                }
-                *inputC = 0x00;
-            }
+            // if (inputC != 0x00)
+            // {
+            //     switch (*inputC)
+            //     {
+            //         case 'w': // Up
+            //         case 'k':
+            //         {
+            //             // TODO drop
+            //             break;
+            //         }
+            //         case 's': // Down
+            //         case 'j':
+            //         {
+            //             yshift--;
+            //             break;
+            //         }
+            //         case 'a': // Left
+            //         case 'h':
+            //         {
+            //             xShift--;
+            //             break;
+            //         }
+            //         case 'd': // Right
+            //         case 'l':
+            //         {
+            //             xShift++;
+            //             break;
+            //         }
+            //         case 'q': // Rotate
+            //         {
+            //             rotateState = CounterClockwise;
+            //             break;
+            //         }
+            //         case 'e': // Rotate
+            //         {
+            //             rotateState = Clockwise;
+            //             break;
+            //         }
+            //         // Exit program
+            //         case 0x1B:           // Escape
+            //         case 0x04:           // End of file
+            //         //case 0x00:           // Other issue from getch()
+            //         {
+            //             // TODO Sent signal to end program
+            //             // _running = false;
+            //             break;
+            //         }
+            //     }
+            //     *inputC = 0x00;
+            // }
 
             // Handle move
             for (int block = 0; block < PIECE_SIZE; block++)
