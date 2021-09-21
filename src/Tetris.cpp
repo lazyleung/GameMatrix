@@ -139,6 +139,7 @@ void Tetris::addPiece()
         currentPiece[block].y = TETRIS_BOARD_ROWS - (pieceShapes[nextShape][block] % 2 == 0 ?  1 : 0);
         currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[nextShape][block] / 2);
     }
+    std::cout << "Current piece added!" << std::endl;
 
     std::thread getNextShape([&]() {
         // Insert base piece
