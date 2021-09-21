@@ -8,7 +8,7 @@
 
 // Tetris width always 10 wide
 #define TETRIS_BOARD_COLS 10
-#define TETRIS_BOARD_ROWS 12
+#define TETRIS_BOARD_ROWS 11
 #define TETRIS_BOARD_ROWS_HIDDEN 8
 // How many pixels per Tetris block
 #define BLOCK_SIZE 5
@@ -69,13 +69,13 @@ class Tetris
 
         // Point of rotation is [?][1]
         // Based on following mapping:
-        // 1 2 3 4
-        //   5 6 7
+        // 1 3 5 7
+        //   2 4 6
         const int pieceShapes[7][4] =
         {
             1,3,5,7, // I
-            2,4,5,7, // Z
-            3,5,4,6, // S
+            2,4,5,7, // S
+            3,5,4,6, // Z
             3,5,4,7, // T
             2,3,5,7, // L
             3,5,7,6, // J
