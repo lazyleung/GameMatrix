@@ -28,7 +28,7 @@ static void InterruptHandler(int signo) {
 
 static bool _running;
 
-static bool oldInputs[TOTAL_INPUTS];
+static int oldInputs[TOTAL_INPUTS];
 volatile bool inputs[TOTAL_INPUTS];
 
 static void DrawOnCanvas(RGBMatrix *matrix) {
@@ -87,7 +87,8 @@ static void getArcadeInput()
 	{
 		input = digitalRead(GPIO_OFFSET + i);
 
-		if (oldInputs[i] == true)
+		// Change on falling edge
+		if (oldInputs[i] == 1 && input == 0)
 		{
 			inputs[i] = true;
 		}
