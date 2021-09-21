@@ -341,8 +341,12 @@ void Tetris::PlayTetris(volatile bool *inputs)
         {
             int xShift = 0;
             int yshift = 0;
-            rotateState = NoRotate; 
+            rotateState = NoRotate;
 
+            // For block movement
+            // Immediately react on button down
+            // Set a delay before input is recognized again
+            // This delay is shorter if button is being held
             if (inputCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
             {
                 if (!prevInputs[Left])
@@ -372,7 +376,14 @@ void Tetris::PlayTetris(volatile bool *inputs)
 
             if (inputCounts[Down] == 0 && inputs[Down] && !inputs[Left] && !inputs[Right])
             {
-                inputCounts[Down] = INPUT_TARGET;
+                if (!prevInputs[Down])
+                {
+                    inputCounts[Down] = INPUT_TARGET;
+                }
+                else
+                {
+                    inputCounts[Down] = INPUT_TARGET/2;
+                }
                 yshift--;
             }
 
