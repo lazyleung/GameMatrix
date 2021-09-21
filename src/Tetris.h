@@ -84,6 +84,7 @@ class Tetris
         };
 
         uint8_t pieceBag;
+        int nextShape;
 
         int inputDelayCounts[TOTAL_INPUTS];
         bool prevInputs[TOTAL_INPUTS];

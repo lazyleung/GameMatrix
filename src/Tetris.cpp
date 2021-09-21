@@ -154,6 +154,7 @@ void Tetris::addPiece()
             pieceBag = pieceBag | (0x01 << shape);
         }
     }
+    nextShape = shape;
 
     // std::cout << "PieceBag: " << std::hex << (0xFF & pieceBag) << std::endl;
 
@@ -161,8 +162,8 @@ void Tetris::addPiece()
     currentPieceStatus = Default;
     for (int block = 0; block < PIECE_SIZE; block++)
     {
-        currentPiece[block].y = TETRIS_BOARD_ROWS - (pieceShapes[shape][block] % 2 == 0 ?  1 : 0);
-        currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[shape][block] / 2);
+        currentPiece[block].y = TETRIS_BOARD_ROWS - (pieceShapes[nextShape][block] % 2 == 0 ?  1 : 0);
+        currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[nextShape][block] / 2);
     }
 }
 
@@ -203,6 +204,8 @@ void Tetris::InitTetris()
     srand(time(NULL));
     clearPieceBag();
     addPiece();
+    clearPieceBag();
+    addPiece();
 }
 
 void Tetris::CleanupTetris()
@@ -241,6 +244,8 @@ void Tetris::DrawTetris(RGBMatrix *matrix)
             {
                 // Draw border background
                 canvas->SetPixel(x, y, 108, 64, 173);
+
+                // TODO Draw preview piece in border
             }
             else
             {
@@ -254,7 +259,7 @@ void Tetris::DrawTetris(RGBMatrix *matrix)
                     canvas->SetPixel(x, y, 0, 0, 0);
                     for (int block = 0; block < PIECE_SIZE; block++)
                     {
-                        if (tState != ClearAnimation && currentPiece[block].x == col && currentPiece[block].y == row)
+                        if (currentPiece[block].x == col && currentPiece[block].y == row)
                         {
                             int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
                             int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
