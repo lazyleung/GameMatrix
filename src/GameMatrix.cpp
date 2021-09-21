@@ -211,11 +211,10 @@ int main(int argc, char *argv[]) {
 	DrawOnCanvas(matrix);
 
 	isKB = false;
-	if (argc > 0 && isatty(STDIN_FILENO))
+	if (argc > 1 && isatty(STDIN_FILENO))
 	{
-		std::cout << "Argc: " << argc << " , argv[0]: " <<  argv[0] << std::endl;
 		std::string kb ("kb");
-		if (kb.compare(argv[0]) == 0)
+		if (kb.compare(argv[1]) == 0)
 		{
 			std::cout << "KB mode enabled!" << std::endl;
 			isKB = true;
