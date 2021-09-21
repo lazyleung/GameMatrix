@@ -105,6 +105,7 @@ class Tetris
 
         bool checkPiecePos(PiecePos *piece);
         void checkCurrentPiecePos();
+        void getNextShape();
         void addPiece();
         void clearPieceBag();
 

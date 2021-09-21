@@ -129,6 +129,34 @@ void Tetris::checkCurrentPiecePos()
     }
 }
 
+void Tetris::getNextShape()
+{
+    // Insert base piece
+    if (pieceBag == 0xFF)
+    {
+        std::cout << "PieceBag Full!" << std::endl;
+        pieceBag = 0x80;
+    }
+    int shape = 7;
+    bool isPieceSelected = false;
+    while (!isPieceSelected)
+    {
+        if (shape >= 7 || (pieceBag & (0x01 << shape)))
+        {
+            // Piece already in bag
+            shape = rand() % 7;
+        }
+        else
+        {
+            // Piece valid!
+            isPieceSelected = true;
+            pieceBag = pieceBag | (0x01 << shape);
+            std::cout << "Shape Added: " << shape << std::endl;
+        }
+    }
+    nextShape = shape;
+}
+
 // Add next piece to board
 void Tetris::addPiece()
 {
@@ -141,33 +169,8 @@ void Tetris::addPiece()
     }
     std::cout << "Current piece added!" << std::endl;
 
-    std::thread getNextShape([&]() {
-        // Insert base piece
-        if (pieceBag == 0xFF)
-        {
-            std::cout << "PieceBag Full!" << std::endl;
-            pieceBag = 0x80;
-        }
-        int shape = 7;
-        bool isPieceSelected = false;
-        while (!isPieceSelected)
-        {
-            if (shape >= 7 || (pieceBag & (0x01 << shape)))
-            {
-                // Piece already in bag
-                shape = rand() % 7;
-            }
-            else
-            {
-                // Piece valid!
-                isPieceSelected = true;
-                pieceBag = pieceBag | (0x01 << shape);
-                std::cout << "Shape Added: " << shape << std::endl;
-            }
-        }
-        nextShape = shape;
-    });
-    getNextShape.detach();
+    std::thread thread_object(&Tetris::getNextShape, this);
+    thread_object.detach();
 }
 
 void Tetris::clearPieceBag()
@@ -206,7 +209,7 @@ void Tetris::InitTetris()
 
     srand(time(NULL));
     clearPieceBag();
-    addPiece();
+    getNextShape();
     addPiece();
 }
 
