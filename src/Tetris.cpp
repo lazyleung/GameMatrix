@@ -139,13 +139,12 @@ void Tetris::addPiece()
         currentPiece[block].y = TETRIS_BOARD_ROWS - (pieceShapes[nextShape][block] % 2 == 0 ?  1 : 0);
         currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[nextShape][block] / 2);
     }
-    
-    while(isGettingNextShape) {}
 
     std::thread getNextShape([&]() {
         // Insert base piece
         if (pieceBag == 0xFF)
         {
+            std::cout << "PieceBag Full!" << std::endl;
             pieceBag = 0x80;
         }
         int shape = 7;
@@ -166,16 +165,13 @@ void Tetris::addPiece()
             }
         }
         nextShape = shape;
-        isGettingNextShape = false;
     });
     getNextShape.detach();
-    isGettingNextShape = true;
 }
 
 void Tetris::clearPieceBag()
 {
     pieceBag = 0x80;
-    isGettingNextShape = false;
 }
 
 // ---------- Constructors and Destructors ----------
