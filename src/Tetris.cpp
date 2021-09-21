@@ -164,6 +164,7 @@ void Tetris::addPiece()
             }
         }
         nextShape = shape;
+        return;
     });
 }
 
