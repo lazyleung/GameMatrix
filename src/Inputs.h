@@ -11,7 +11,9 @@ enum inputsMap
 	Right,
 	Up,
 	Down,
-	A
+	A,
+	B,
+	Menu
 };
 
 #endif

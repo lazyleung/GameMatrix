@@ -11,6 +11,7 @@
 #include <iostream>
 #include <signal.h>
 #include <termios.h>
+#include <string>
 
 #include <wiringPi.h>
 #include <mcp23017.h>
@@ -27,8 +28,8 @@ static void InterruptHandler(int signo) {
 }
 
 static bool _running;
+static bool isKB;
 
-// static int oldInputs[TOTAL_INPUTS];
 volatile bool inputs[TOTAL_INPUTS];
 
 static void DrawOnCanvas(RGBMatrix *matrix) {
@@ -55,6 +56,100 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 	}
 }
 
+
+// Check if there is any input on the unbuffered terminal
+bool inputAvailable()
+{
+	std::cin.clear();
+	
+	struct timeval tv;
+	fd_set fds;
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	FD_ZERO(&fds);
+	FD_SET(STDIN_FILENO, &fds);
+	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+	return (FD_ISSET(0, &fds));
+}
+
+// Get update inputs
+static void getch() 
+{
+	char buf = 0;
+	if (read(STDIN_FILENO, &buf, 1) < 0)
+	{
+		perror ("read()");
+	}
+	
+	switch (buf)
+	{
+		case 'w': // Up
+		case 'k':
+		{
+			inputs[Up] = true;
+			break;
+		}
+		case 's': // Down
+		case 'j':
+		{
+			inputs[Down] = true;
+			break;
+		}
+		case 'a': // Left
+		case 'h':
+		{
+			inputs[Left] = true;
+			break;
+		}
+		case 'd': // Right
+		case 'l':
+		{
+			inputs[Right] = true;
+			break;
+		}
+		case 'q': // Rotate
+		{
+			inputs[A] = true;
+			break;
+		}
+		case 'e': // Rotate
+		{
+			inputs[B] = true;
+			break;
+		}
+		// Exit program
+		case 0x1B:           // Escape
+		case 0x04:           // End of file
+		case 0x00:           // Other issue from getch()
+		{
+			inputs[Menu] = true;
+			break;
+		}
+	}
+}
+
+struct termios old;
+void enableTerminalInput()
+{
+	// Set terminal to unbuffered mode
+	if (tcgetattr(0, &old) < 0)
+		perror("tcsetattr()");
+	struct termios no_echo = old;
+	no_echo.c_lflag &= ~ICANON;
+	no_echo.c_lflag &= ~ECHO;
+	no_echo.c_cc[VMIN] = 1;
+	no_echo.c_cc[VTIME] = 0;
+	if (tcsetattr(0, TCSANOW, &no_echo) < 0)
+		perror("tcsetattr ICANON");
+}
+
+void disableTerminalInput()
+{
+	// Restore terminal attributes
+	if (tcsetattr(0, TCSADRAIN, &old) < 0)
+	perror ("tcsetattr ~ICANON");
+}
+
 static void getArcadeInput()
 {
 	int i, input;
@@ -66,14 +161,6 @@ static void getArcadeInput()
 		{
 			inputs[i] = true;
 		}
-
-		// Change on falling edge
-		// if (oldInputs[i] == 1 && input == 0)
-		// {
-		// 	inputs[i] = true;
-		// }
-
-		// oldInputs[i] = input;
 	}
 }
 
@@ -123,130 +210,42 @@ int main(int argc, char *argv[]) {
 	// StartUp Animation
 	DrawOnCanvas(matrix);
 
-	// is_terminal = isatty(STDIN_FILENO);
-	// enableTerminalInput();
+	isKB = false;
+	if (argc > 0 && isatty(STDIN_FILENO))
+	{
+		std::string kb ("kb");
+		if (kb.compare(argv[0]) == 0)
+		{
+			isKB = true;
+			enableTerminalInput();
+		}
+	}
 
-	// Tetris Engine
+	// Game Engine
 	while (!interrupt_received && _running)
 	{
-		// volatile char c = 0x00;
-		// if (inputAvailable())
-		// {
-		// 	   getch();
-		// }
-
-		getArcadeInput();
+		if (isKB)
+		{
+			if (inputAvailable())
+			{
+				getch();
+			}
+		}
+		else
+		{
+			getArcadeInput();
+		}
 
 		t->PlayTetris(inputs);
 		t->DrawTetris(matrix);
 	}
 
-	// disableTerminalInput();
+	if (isKB)
+	{
+		disableTerminalInput();
+	}
 
 	delete matrix;
 
 	return 0;
 }
-
-
-// Check if there is any input on the unbuffered terminal
-// bool inputAvailable()
-// {
-// 	std::cin.clear();
-	
-// 	struct timeval tv;
-// 	fd_set fds;
-// 	tv.tv_sec = 0;
-// 	tv.tv_usec = 0;
-// 	FD_ZERO(&fds);
-// 	FD_SET(STDIN_FILENO, &fds);
-// 	select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
-// 	return (FD_ISSET(0, &fds));
-// }
-
-// Get update inputs
-// static void getch() 
-// {
-// 	char buf = 0;
-// 	if (read(STDIN_FILENO, &buf, 1) < 0)
-// 		perror ("read()");
-            // Capture Input
-            // if (inputC != 0x00)
-            // {
-            //     switch (*inputC)
-            //     {
-            //         case 'w': // Up
-            //         case 'k':
-            //         {
-            //             // TODO drop
-            //             break;
-            //         }
-            //         case 's': // Down
-            //         case 'j':
-            //         {
-            //             yshift--;
-            //             break;
-            //         }
-            //         case 'a': // Left
-            //         case 'h':
-            //         {
-            //             xShift--;
-            //             break;
-            //         }
-            //         case 'd': // Right
-            //         case 'l':
-            //         {
-            //             xShift++;
-            //             break;
-            //         }
-            //         case 'q': // Rotate
-            //         {
-            //             rotateState = CounterClockwise;
-            //             break;
-            //         }
-            //         case 'e': // Rotate
-            //         {
-            //             rotateState = Clockwise;
-            //             break;
-            //         }
-            //         // Exit program
-            //         case 0x1B:           // Escape
-            //         case 0x04:           // End of file
-            //         //case 0x00:           // Other issue from getch()
-            //         {
-            //             // TODO Sent signal to end program
-            //             // _running = false;
-            //             break;
-            //         }
-            //     }
-            //     *inputC = 0x00;
-            // }
-// 	return buf;
-// }
-
-// struct termios old;
-// bool is_terminal;
-// void enableTerminalInput()
-// {
-// 	// Set terminal to unbuffered mode
-// 	if (is_terminal) {
-// 		if (tcgetattr(0, &old) < 0)
-// 			perror("tcsetattr()");
-// 		struct termios no_echo = old;
-// 		no_echo.c_lflag &= ~ICANON;
-// 		no_echo.c_lflag &= ~ECHO;
-// 		no_echo.c_cc[VMIN] = 1;
-// 		no_echo.c_cc[VTIME] = 0;
-// 		if (tcsetattr(0, TCSANOW, &no_echo) < 0)
-// 			perror("tcsetattr ICANON");
-// 	}
-// }
-
-// void disableTerminalInput()
-// {
-// 	// Restore terminal attributes
-// 	if (is_terminal) {
-// 		if (tcsetattr(0, TCSADRAIN, &old) < 0)
-// 		perror ("tcsetattr ~ICANON");
-// 	}
-// }
