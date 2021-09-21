@@ -345,7 +345,15 @@ void Tetris::PlayTetris(volatile bool *inputs)
 
             if (inputCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
             {
-                inputCounts[Left] = INPUT_TARGET;
+                if (!prevInputs[Left])
+                {
+                    inputCounts[Left] = INPUT_TARGET;
+                }
+                else
+                {
+                    inputCounts[Left] = INPUT_TARGET/2;
+                }
+                
                 xShift--;
             }
 
@@ -361,9 +369,10 @@ void Tetris::PlayTetris(volatile bool *inputs)
                 yshift--;
             }
 
+            // Only on button down
             if (!prevInputs[A] && inputs[A])
             {
-                 rotateState = CounterClockwise;
+                rotateState = CounterClockwise;
             }
 
             for (int i = 0; i < TOTAL_INPUTS; i++)
