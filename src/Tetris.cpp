@@ -345,10 +345,7 @@ void Tetris::PlayTetris(volatile bool *inputs)
 
             if (inputCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
             {
-                if (prevInputs[Left] == 1)
-                {
-                    inputCounts[Left] = INPUT_TARGET;
-                }
+                inputCounts[Left] = INPUT_TARGET;
                 xShift--;
             }
 
@@ -364,7 +361,7 @@ void Tetris::PlayTetris(volatile bool *inputs)
                 yshift--;
             }
 
-            if (prevInputs[A] == 1 && inputs[A])
+            if (!prevInputs[A] && inputs[A])
             {
                  rotateState = CounterClockwise;
             }
