@@ -28,7 +28,7 @@ static void InterruptHandler(int signo) {
 
 static bool _running;
 
-static bool oldInputs[TOTAL_INPUTS;
+static bool oldInputs[TOTAL_INPUTS];
 volatile bool inputs[TOTAL_INPUTS];
 
 static void DrawOnCanvas(RGBMatrix *matrix) {
