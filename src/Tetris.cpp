@@ -168,7 +168,7 @@ void Tetris::addPiece()
         nextShape = shape;
         isGettingNextShape = false;
     });
-
+    getNextShape.detach();
     isGettingNextShape = true;
 }
 
