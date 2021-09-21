@@ -19,7 +19,6 @@
 #define INPUT_DELAY_TARGET 5
 #define LINE_CLEAR_TARGET 50
 #define GRAVITY_UPDATE_TARGET 60
-#define GRAVITY_BOTTOM_TARGET 2
 
 using namespace rgb_matrix;
 
@@ -94,7 +93,6 @@ class Tetris
         bool isShiftInc;
 
         int gravityCount;
-        int bottomCountTarget;
         int clearCount;
 
         uint8_t scale_col(int val, int lo, int hi);
