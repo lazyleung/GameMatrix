@@ -359,7 +359,14 @@ void Tetris::PlayTetris(volatile bool *inputs)
 
             if (inputCounts[Right] == 0 && inputs[Right] && !inputs[Up] && !inputs[Down])
             {
-                inputCounts[Right] = INPUT_TARGET;
+                if (!prevInputs[Right])
+                {
+                    inputCounts[Right] = INPUT_TARGET;
+                }
+                else
+                {
+                    inputCounts[Right] = INPUT_TARGET/2;
+                }
                 xShift++;
             }
 
