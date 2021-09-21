@@ -86,6 +86,7 @@ class Tetris
         uint8_t pieceBag;
 
         int inputCounts[TOTAL_INPUTS];
+        bool prevInputs[TOTAL_INPUTS];
 
         Row * tetrisBoard;
         int defaultColorShift;

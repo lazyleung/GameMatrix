@@ -189,6 +189,12 @@ void Tetris::InitTetris()
         std::cout << std::endl;
     }
 
+    for (int i = 0; i < TOTAL_INPUTS; i++)
+    {
+        inputCounts[i] = 0;
+        prevInputs[i] = false;
+    }
+
     tState = Normal;
     defaultColorShift = 0;
     gravityCount = 0;
@@ -339,7 +345,10 @@ void Tetris::PlayTetris(volatile bool *inputs)
 
             if (inputCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
             {
-                inputCounts[Left] = INPUT_TARGET;
+                if (prevInputs[Left] == 1)
+                {
+                    inputCounts[Left] = INPUT_TARGET;
+                }
                 xShift--;
             }
 
@@ -355,13 +364,14 @@ void Tetris::PlayTetris(volatile bool *inputs)
                 yshift--;
             }
 
-            if (inputs[A])
+            if (prevInputs[A] == 1 && inputs[A])
             {
                  rotateState = CounterClockwise;
             }
 
             for (int i = 0; i < TOTAL_INPUTS; i++)
             {
+                prevInputs[i] = inputs[i];
                 inputs[i] = false;
                 if (inputCounts[i] > 0)
                 {
