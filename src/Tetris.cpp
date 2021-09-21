@@ -1,6 +1,7 @@
 #include "Tetris.h"
 
 #include <iostream>
+#include<thread>
 
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
@@ -131,33 +132,6 @@ void Tetris::checkCurrentPiecePos()
 // Add next piece to board
 void Tetris::addPiece()
 {
-    // Insert base piece
-    if (pieceBag == 0xFF)
-    {
-        pieceBag = 0x80;
-    }
-
-    int shape = 7;
-    bool isPieceSelected = false;
-    while (!isPieceSelected)
-    {
-        // std::cout << "Shape " << shape << " ";
-        if (shape >= 7 || (pieceBag & (0x01 << shape)))
-        {
-            // Piece already in bag
-            shape = rand() % 7;
-        }
-        else
-        {
-            // Piece valid!
-            isPieceSelected = true;
-            pieceBag = pieceBag | (0x01 << shape);
-        }
-    }
-    nextShape = shape;
-
-    // std::cout << "PieceBag: " << std::hex << (0xFF & pieceBag) << std::endl;
-
     // TODO add random color status
     currentPieceStatus = Default;
     for (int block = 0; block < PIECE_SIZE; block++)
@@ -165,6 +139,32 @@ void Tetris::addPiece()
         currentPiece[block].y = TETRIS_BOARD_ROWS - (pieceShapes[nextShape][block] % 2 == 0 ?  1 : 0);
         currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[nextShape][block] / 2);
     }
+    
+    std::thread getNextShape([&]() {
+        // Insert base piece
+        if (pieceBag == 0xFF)
+        {
+            pieceBag = 0x80;
+        }
+        int shape = 7;
+        bool isPieceSelected = false;
+        while (!isPieceSelected)
+        {
+            if (shape >= 7 || (pieceBag & (0x01 << shape)))
+            {
+                // Piece already in bag
+                shape = rand() % 7;
+            }
+            else
+            {
+                // Piece valid!
+                isPieceSelected = true;
+                pieceBag = pieceBag | (0x01 << shape);
+                std::cout << "Shape Added: " << shape << std::endl;
+            }
+        }
+        nextShape = shape;
+    });
 }
 
 void Tetris::clearPieceBag()
@@ -204,7 +204,6 @@ void Tetris::InitTetris()
     srand(time(NULL));
     clearPieceBag();
     addPiece();
-    clearPieceBag();
     addPiece();
 }
 
