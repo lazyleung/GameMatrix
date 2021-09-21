@@ -140,6 +140,8 @@ void Tetris::addPiece()
         currentPiece[block].x = TETRIS_BOARD_COLS/2 - 2 + (pieceShapes[nextShape][block] / 2);
     }
     
+    while(isGettingNextShape) {}
+
     std::thread getNextShape([&]() {
         // Insert base piece
         if (pieceBag == 0xFF)
@@ -164,13 +166,16 @@ void Tetris::addPiece()
             }
         }
         nextShape = shape;
-        return;
+        isGettingNextShape = false;
     });
+
+    isGettingNextShape = true;
 }
 
 void Tetris::clearPieceBag()
 {
     pieceBag = 0x80;
+    isGettingNextShape = false;
 }
 
 // ---------- Constructors and Destructors ----------
