@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 	defaults.show_refresh_rate = false;
 
 	rgb_matrix::RuntimeOptions rtOptions;
-	rtOptions.gpio_slowdown = 3;
+	rtOptions.gpio_slowdown = 4;
 	rtOptions.drop_privileges = 0;
 
 	rtOptions.daemon = 0;
