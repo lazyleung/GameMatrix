@@ -141,40 +141,35 @@ void Tetris::addPiece()
     }
     std::cout << "Current piece added!" << std::endl;
 
-    std::thread getNextShape([&]() {
-        // Insert base piece
-        if (pieceBag == 0xFF)
+    // Insert base piece
+    if (pieceBag == 0xFF)
+    {
+        std::cout << "PieceBag Full!" << std::endl;
+        pieceBag = 0x80;
+    }
+    int shape = 7;
+    bool isPieceSelected = false;
+    while (!isPieceSelected)
+    {
+        if (shape >= 7 || (pieceBag & (0x01 << shape)))
         {
-            std::cout << "PieceBag Full!" << std::endl;
-            pieceBag = 0x80;
+            // Piece already in bag
+            shape = rand() % 7;
         }
-        int shape = 7;
-        bool isPieceSelected = false;
-        while (!isPieceSelected)
+        else
         {
-            if (shape >= 7 || (pieceBag & (0x01 << shape)))
-            {
-                // Piece already in bag
-                shape = rand() % 7;
-            }
-            else
-            {
-                // Piece valid!
-                isPieceSelected = true;
-                pieceBag = pieceBag | (0x01 << shape);
-                std::cout << "Shape Added: " << shape << std::endl;
-            }
+            // Piece valid!
+            isPieceSelected = true;
+            pieceBag = pieceBag | (0x01 << shape);
+            std::cout << "Shape Added: " << shape << std::endl;
         }
-        nextShape = shape;
-        isGetNextShape = false;
-    });
-    getNextShape.detach();
+    }
+    nextShape = shape;
 }
 
 void Tetris::clearPieceBag()
 {
     pieceBag = 0x80;
-    isGetNextShape = false;
 }
 
 // ---------- Constructors and Destructors ----------
@@ -208,9 +203,7 @@ void Tetris::InitTetris()
 
     srand(time(NULL));
     clearPieceBag();
-    isGetNextShape = true;
     addPiece();
-    while (isGetNextShape) {}
     addPiece();
 }
 
