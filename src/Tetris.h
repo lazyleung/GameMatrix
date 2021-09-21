@@ -1,4 +1,7 @@
-# ifndef _tetris
+#ifndef _tetris
+#define _tetris
+
+#include "Inputs.h"
 
 #include "led-matrix.h"
 #include "graphics.h"
@@ -13,6 +16,7 @@
 #define BOARD_X_OFFSET 7
 #define BOARD_Y_OFFSET 4
 
+#define INPUT_TARGET 5
 #define LINE_CLEAR_TARGET 50
 #define GRAVITY_UPDATE_TARGET 60
 #define GRAVITY_BOTTOM_TARGET 45
@@ -80,6 +84,8 @@ class Tetris
         };
 
         uint8_t pieceBag;
+
+        int inputCounts[TOTAL_INPUTS];
 
         Row * tetrisBoard;
         int defaultColorShift;

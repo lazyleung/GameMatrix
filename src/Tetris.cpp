@@ -1,8 +1,4 @@
 #include "Tetris.h"
-#include "Inputs.h"
-
-#include "led-matrix.h"
-#include "graphics.h"
 
 #include <iostream>
 
@@ -341,18 +337,21 @@ void Tetris::PlayTetris(volatile bool *inputs)
             int yshift = 0;
             rotateState = NoRotate; 
 
-            if (inputs[Left] && !inputs[Up] && !inputs[Down])
+            if (inputCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
             {
+                inputCounts[Left] = INPUT_TARGET;
                 xShift--;
             }
 
-            if (inputs[Right] && !inputs[Up] && !inputs[Down])
+            if (inputCounts[Right] == 0 && inputs[Right] && !inputs[Up] && !inputs[Down])
             {
+                inputCounts[Right] = INPUT_TARGET;
                 xShift++;
             }
 
-            if (inputs[Down] && !inputs[Left] && !inputs[Right])
+            if (inputCounts[Down] == 0 && inputs[Down] && !inputs[Left] && !inputs[Right])
             {
+                inputCounts[Down] = INPUT_TARGET;
                 yshift--;
             }
 
@@ -364,59 +363,11 @@ void Tetris::PlayTetris(volatile bool *inputs)
             for (int i = 0; i < TOTAL_INPUTS; i++)
             {
                 inputs[i] = false;
+                if (inputCounts[i] > 0)
+                {
+                    inputCounts[i]--;
+                }
             }
-
-            // Capture Input
-            // if (inputC != 0x00)
-            // {
-            //     switch (*inputC)
-            //     {
-            //         case 'w': // Up
-            //         case 'k':
-            //         {
-            //             // TODO drop
-            //             break;
-            //         }
-            //         case 's': // Down
-            //         case 'j':
-            //         {
-            //             yshift--;
-            //             break;
-            //         }
-            //         case 'a': // Left
-            //         case 'h':
-            //         {
-            //             xShift--;
-            //             break;
-            //         }
-            //         case 'd': // Right
-            //         case 'l':
-            //         {
-            //             xShift++;
-            //             break;
-            //         }
-            //         case 'q': // Rotate
-            //         {
-            //             rotateState = CounterClockwise;
-            //             break;
-            //         }
-            //         case 'e': // Rotate
-            //         {
-            //             rotateState = Clockwise;
-            //             break;
-            //         }
-            //         // Exit program
-            //         case 0x1B:           // Escape
-            //         case 0x04:           // End of file
-            //         //case 0x00:           // Other issue from getch()
-            //         {
-            //             // TODO Sent signal to end program
-            //             // _running = false;
-            //             break;
-            //         }
-            //     }
-            //     *inputC = 0x00;
-            // }
 
             // Handle move
             for (int block = 0; block < PIECE_SIZE; block++)
