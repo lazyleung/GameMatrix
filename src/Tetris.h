@@ -85,6 +85,7 @@ class Tetris
 
         uint8_t pieceBag;
         int nextShape;
+        bool isGetNextShape;
 
         int inputDelayCounts[TOTAL_INPUTS];
         bool prevInputs[TOTAL_INPUTS];
@@ -105,7 +106,6 @@ class Tetris
 
         bool checkPiecePos(PiecePos *piece);
         void checkCurrentPiecePos();
-        void getNextShape();
         void addPiece();
         void clearPieceBag();
 
