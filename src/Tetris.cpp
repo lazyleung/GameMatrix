@@ -259,7 +259,8 @@ void Tetris::DrawTetris(RGBMatrix *matrix)
                     canvas->SetPixel(x, y, 0, 0, 0);
                     for (int block = 0; block < PIECE_SIZE; block++)
                     {
-                        if (currentPiece[block].x == col && currentPiece[block].y == row)
+                        // Don't draw piece if clearing
+                        if (tState != ClearAnimation && currentPiece[block].x == col && currentPiece[block].y == row)
                         {
                             int bX = (x - BOARD_X_OFFSET) % BLOCK_SIZE;
                             int bY = (canvas->height() -y - BOARD_Y_OFFSET - 1) % BLOCK_SIZE;
