@@ -163,22 +163,10 @@ int main(int argc, char *argv[]) {
 
 	wiringPiSetup();
 	mcp23017Setup(GPIO_OFFSET, 0x20);
-	// Stick
-	int i;
-	int j;
-	for (i = 0; i < 4; i++)
+	for (int i = 0; i < TOTAL_INPUTS; i++)
 	{
-			wiringPiISR(GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandlerJoystick) ;
-			// pinMode(GPIO_OFFSET + i, INPUT);
-			// pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
-	}
-
-	// Buttons
-	for (j = 0; j < 3; j++, i++)
-	{
-			wiringPiISR(GPIO_OFFSET + i, INT_EDGE_FALLING, &inputHandler) ;
-			//pinMode(GPIO_OFFSET + i, INPUT);
-			//pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
+			pinMode(GPIO_OFFSET + i, INPUT);
+			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
 	}
 
 	_running = true;
@@ -214,7 +202,7 @@ int main(int argc, char *argv[]) {
 		// }
 
 		getArcadeInput();
-		
+
 		t->PlayTetris(inputs);
 		t->DrawTetris(matrix);
 	}
