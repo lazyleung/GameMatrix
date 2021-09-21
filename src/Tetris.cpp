@@ -132,7 +132,6 @@ void Tetris::checkCurrentPiecePos()
 void Tetris::addPiece()
 {
     // Insert base piece
-
     if (pieceBag == 0xFF)
     {
         pieceBag = 0x80;
@@ -191,7 +190,7 @@ void Tetris::InitTetris()
 
     for (int i = 0; i < TOTAL_INPUTS; i++)
     {
-        inputCounts[i] = 0;
+        inputDelayCounts[i] = 0;
         prevInputs[i] = false;
     }
 
@@ -347,42 +346,42 @@ void Tetris::PlayTetris(volatile bool *inputs)
             // Immediately react on button down
             // Set a delay before input is recognized again
             // This delay is shorter if button is being held
-            if (inputCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
+            if (inputDelayCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
             {
                 if (!prevInputs[Left])
                 {
-                    inputCounts[Left] = INPUT_TARGET;
+                    inputDelayCounts[Left] = INPUT_DELAY_TARGET;
                 }
                 else
                 {
-                    inputCounts[Left] = INPUT_TARGET/2;
+                    inputDelayCounts[Left] = INPUT_DELAY_TARGET/2;
                 }
                 
                 xShift--;
             }
 
-            if (inputCounts[Right] == 0 && inputs[Right] && !inputs[Up] && !inputs[Down])
+            if (inputDelayCounts[Right] == 0 && inputs[Right] && !inputs[Up] && !inputs[Down])
             {
                 if (!prevInputs[Right])
                 {
-                    inputCounts[Right] = INPUT_TARGET;
+                    inputDelayCounts[Right] = INPUT_DELAY_TARGET;
                 }
                 else
                 {
-                    inputCounts[Right] = INPUT_TARGET/2;
+                    inputDelayCounts[Right] = INPUT_DELAY_TARGET/2;
                 }
                 xShift++;
             }
 
-            if (inputCounts[Down] == 0 && inputs[Down] && !inputs[Left] && !inputs[Right])
+            if (inputDelayCounts[Down] == 0 && inputs[Down] && !inputs[Left] && !inputs[Right])
             {
                 if (!prevInputs[Down])
                 {
-                    inputCounts[Down] = INPUT_TARGET;
+                    inputDelayCounts[Down] = INPUT_DELAY_TARGET;
                 }
                 else
                 {
-                    inputCounts[Down] = INPUT_TARGET/2;
+                    inputDelayCounts[Down] = INPUT_DELAY_TARGET/2;
                 }
                 yshift--;
             }
@@ -397,9 +396,9 @@ void Tetris::PlayTetris(volatile bool *inputs)
             {
                 prevInputs[i] = inputs[i];
                 inputs[i] = false;
-                if (inputCounts[i] > 0)
+                if (inputDelayCounts[i] > 0)
                 {
-                    inputCounts[i]--;
+                    inputDelayCounts[i]--;
                 }
             }
 
@@ -491,6 +490,19 @@ void Tetris::PlayTetris(volatile bool *inputs)
                     }
                 }
 
+                // Check if board is full
+                if (tetrisBoard[TETRIS_BOARD_ROWS - 1].cols[TETRIS_BOARD_COLS/2] != None)
+                {
+                    // Clear all lines!
+                    for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
+                    {
+                        tetrisBoard[r].toClear = true;
+                    }
+                    
+                    tState = ClearAnimation;
+                    break;
+                }
+
                 // Check if lines need to be cleared
                 for (int r = 0; r < TETRIS_BOARD_ROWS; r++)
                 {
@@ -524,6 +536,11 @@ void Tetris::PlayTetris(volatile bool *inputs)
         }
         case Clearing:
         {
+            for (int i = 0; i < TOTAL_INPUTS; i++)
+            {
+                inputDelayCounts[i] = INPUT_DELAY_TARGET;
+            } 
+
             clearLines();
             tState = Normal;
             break;
