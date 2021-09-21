@@ -141,8 +141,6 @@ void Tetris::addPiece()
     }
     std::cout << "Current piece added!" << std::endl;
 
-    while(isGetNextShape) {}
-    isGetNextShape = true;
     std::thread getNextShape([&]() {
         // Insert base piece
         if (pieceBag == 0xFF)
@@ -210,7 +208,9 @@ void Tetris::InitTetris()
 
     srand(time(NULL));
     clearPieceBag();
+    isGetNextShape = true;
     addPiece();
+    while (isGetNextShape) {}
     addPiece();
 }
 
