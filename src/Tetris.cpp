@@ -198,7 +198,6 @@ void Tetris::InitTetris()
     tState = Normal;
     defaultColorShift = 0;
     gravityCount = 0;
-    bottomCountTarget = 0;
     clearCount = 0;
 
     srand(time(NULL));
@@ -475,34 +474,18 @@ void Tetris::PlayTetris(volatile bool *inputs)
                 if(!checkPiecePos(currentPiece))
                 {
                     // Piece has hit a block
-                    if(bottomCountTarget >= GRAVITY_BOTTOM_TARGET)
+                    // Save piece location to board
+                    for (int block = 0; block < PIECE_SIZE; block++)
                     {
-                        // Save piece location
-                        for (int block = 0; block < PIECE_SIZE; block++)
-                        {
-                            tetrisBoard[savedPiece[block].y].cols[savedPiece[block].x] = currentPieceStatus;
-                        }
-
-                        addPiece();
-
-                        // Add input delay
-                        for (int i = 0; i < TOTAL_INPUTS; i++)
-                        {
-                            inputDelayCounts[i] = INPUT_DELAY_TARGET * 2;
-                        }
-
-                        bottomCountTarget = 0;
+                        tetrisBoard[savedPiece[block].y].cols[savedPiece[block].x] = currentPieceStatus;
                     }
-                    else
-                    {
-                        // Delay before piece get's saved to block
-                        bottomCountTarget++;
 
-                        // Reset piece
-                        for (int block = 0; block < PIECE_SIZE; block++)
-                        {
-                            currentPiece[block] = savedPiece[block];
-                        }
+                    addPiece();
+
+                    // Add input delay
+                    for (int i = 0; i < TOTAL_INPUTS; i++)
+                    {
+                        inputDelayCounts[i] = INPUT_DELAY_TARGET * 2;
                     }
                 }
 
