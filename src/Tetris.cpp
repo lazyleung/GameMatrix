@@ -489,7 +489,9 @@ void Tetris::PlayTetris(volatile bool *inputs)
                         for (int i = 0; i < TOTAL_INPUTS; i++)
                         {
                             inputDelayCounts[i] = INPUT_DELAY_TARGET * 2;
-                        } 
+                        }
+
+                        bottomCountTarget = 0;
                     }
                     else
                     {
