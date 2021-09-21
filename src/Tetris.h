@@ -8,7 +8,7 @@
 
 // Tetris width always 10 wide
 #define TETRIS_BOARD_COLS 10
-#define TETRIS_BOARD_ROWS 11
+#define TETRIS_BOARD_ROWS 12
 #define TETRIS_BOARD_ROWS_HIDDEN 8
 // How many pixels per Tetris block
 #define BLOCK_SIZE 5
