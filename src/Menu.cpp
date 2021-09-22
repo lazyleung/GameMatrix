@@ -11,7 +11,7 @@ const int y_orig = 10;
 const int y_scale = 12;
 const int x_marker_shift = 5;
 const int y_marker_shift = 3;
-const int marker_radius = 1;
+const int marker_radius = 2;
 const int letter_spacing = 0;
 
 void Menu::upOption()
