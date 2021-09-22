@@ -22,8 +22,9 @@ class Menu
     private:
         static int selectedOption;
         static bool isOptionsDrawn;
+        static bool prevInputs[TOTAL_INPUTS];
         static void upOption();
         static void downOption();
     public:
-        static void Loop(RGBMatrix *canvas, volatile bool *inputs);
+        static int Loop(RGBMatrix *canvas, volatile bool *inputs);
 };

@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
 	defaults.pixel_mapper_config = "U-Mapper";
 
 	defaults.limit_refresh_rate_hz = 120;
-	defaults.show_refresh_rate = false;
+	defaults.show_refresh_rate = true;
 
 	rgb_matrix::RuntimeOptions rtOptions;
 	rtOptions.gpio_slowdown = 4;
@@ -248,13 +248,30 @@ int main(int argc, char *argv[])
 		switch (matrixMode)
 		{
 			case MenuMode:
-				Menu::Loop(matrix, inputs);
+				switch (Menu::Loop(matrix, inputs))
+				{
+					case TetrisMenuOption:
+						matrixMode = TetrisMode;
+						break;
+					case PokemonMenuOption:
+						matrixMode = PokemonMode;
+						break;
+					case RestartMenuOption:
+						_running = false;
+						break;
+				}
 				break;
 			case TetrisMode:
-				t->PlayTetris(inputs);
+				int result = t->PlayTetris(inputs);
 				t->DrawTetris(matrix);
+
+				if (result = -1)
+				{
+					matrixMode = MenuMode;
+				}
 				break;
 			case PokemonMode:
+				matrixMode = MenuMode;
 				break;
 			default:
 				break;
