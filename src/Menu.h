@@ -1,6 +1,8 @@
 #ifndef _menu
 #define _menu
 
+#include "Inputs.h"
+
 #include "led-matrix.h"
 
 #define FONT_FILE "./8bit.bdf"

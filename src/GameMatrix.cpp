@@ -257,18 +257,17 @@ int main(int argc, char *argv[])
 						matrixMode = PokemonMode;
 						break;
 					case RestartMenuOption:
+					default:
 						_running = false;
 						break;
 				}
 				break;
 			case TetrisMode:
-				int result = t->PlayTetris(inputs);
-				t->DrawTetris(matrix);
-
-				if (result = -1)
+				if (t->PlayTetris(inputs) == -1)
 				{
 					matrixMode = MenuMode;
 				}
+				t->DrawTetris(matrix);
 				break;
 			case PokemonMode:
 				matrixMode = MenuMode;

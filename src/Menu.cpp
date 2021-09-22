@@ -9,7 +9,7 @@ using namespace rgb_matrix;
 int Menu::selectedOption = TetrisMenuOption;
 bool Menu::isOptionsDrawn = false;
 
-bool prevInputs[TOTAL_INPUTS];
+bool Menu::prevInputs[TOTAL_INPUTS];
 
 void Menu::upOption()
 {
@@ -59,7 +59,7 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     rgb_matrix::Font font;
     if (!font.LoadFont(FONT_FILE)) {
         fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
-        return;
+        return -1;
     }
 
     matrix->Fill(flood_color.r, flood_color.g, flood_color.b);

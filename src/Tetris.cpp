@@ -335,7 +335,7 @@ void Tetris::DrawTetris(RGBMatrix *matrix)
     matrix->SwapOnVSync(canvas, 2U);
 }
 
-void Tetris::PlayTetris(volatile bool *inputs)
+int Tetris::PlayTetris(volatile bool *inputs)
 {    
     switch (tState)
     {
@@ -393,6 +393,10 @@ void Tetris::PlayTetris(volatile bool *inputs)
             if (!prevInputs[AButton] && inputs[AButton])
             {
                 rotateState = CounterClockwise;
+            }
+            if (!prevInputs[MenuButton] && inputs[MenuButton])
+            {
+                return -1;
             }
 
             for (int i = 0; i < TOTAL_INPUTS; i++)
@@ -539,4 +543,6 @@ void Tetris::PlayTetris(volatile bool *inputs)
             break;
         }
     }
+
+    return 0;
 }

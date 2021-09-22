@@ -116,5 +116,5 @@ class Tetris
         void UpdateDefaultColorShift();
 
         void DrawTetris(RGBMatrix *matrix);
-        void PlayTetris(volatile bool *inputs);
+        int PlayTetris(volatile bool *inputs);
 };
