@@ -23,12 +23,17 @@ Menu::Menu()
 
 Menu::~Menu()
 {
-    
+
 }
 
 void Menu::Reset()
 {
     selectedOption = TetrisMenuOption;
+
+    for (int i = 0; i < TOTAL_INPUTS; i++)
+    {
+        prevInputs[i] = false;
+    }
 }
 
 int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
