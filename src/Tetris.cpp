@@ -176,18 +176,7 @@ void Tetris::clearPieceBag()
 void Tetris::InitTetris()
 {
     tetrisBoard = (Row*)calloc(sizeof(Row), TETRIS_BOARD_ROWS);
-
-    int rows = TETRIS_BOARD_ROWS;
-    for (int y = rows - 1; y >= 0; y--)
-    {
-        std::cout << "Row " << y << ":\t";
-        for (int x = 0; x < TETRIS_BOARD_ROWS; x++)
-        {
-            std::cout << (tetrisBoard[y].cols[x] != None ? "1 " : "0 ");
-        }
-        std::cout << std::endl;
-    }
-
+    
     for (int i = 0; i < TOTAL_INPUTS; i++)
     {
         inputDelayCounts[i] = 0;
@@ -198,8 +187,6 @@ void Tetris::InitTetris()
     defaultColorShift = 0;
     gravityCount = 0;
     clearCount = 0;
-
-    std::cout << "Adding piecies..." << std::endl;
 
     srand(time(NULL));
     clearPieceBag();

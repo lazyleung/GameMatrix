@@ -6,6 +6,14 @@
 
 using namespace rgb_matrix;
 
+const int x_orig = 11;
+const int y_orig = 10;
+const int y_scale = 12;
+const int x_marker_shift = 5;
+const int y_marker_shift = 3;
+const int marker_radius = 1;
+const int letter_spacing = 0;
+
 void Menu::upOption()
 {
     selectedOption = (selectedOption == TetrisMenuOption) ? RestartMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)-1);
@@ -30,14 +38,16 @@ void Menu::Reset()
 {
     selectedOption = TetrisMenuOption;
 
+    // Prevent an option getting immediately returned
     for (int i = 0; i < TOTAL_INPUTS; i++)
     {
-        prevInputs[i] = false;
+        prevInputs[i] = true;
     }
 }
 
 int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 {
+    // Proccess inputs on button down
     if (inputs[UpStick] && !prevInputs[UpStick])
     {
         upOption();
@@ -58,16 +68,11 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
         prevInputs[i] = inputs[i];
         inputs[i] = false;
     }
-    
+
+    // Draw Menu
     Color color(255, 255, 0);
     Color bg_color(0, 0, 0);
     Color flood_color(0, 0, 0);
-    Color outline_color(0,0,0);
-
-    const int x_orig = 10;
-    const int y_orig = 10;
-    const int y_scale = 12;
-    const int letter_spacing = 0;
     
     // Load font
     rgb_matrix::Font font;
@@ -76,7 +81,10 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
         return -1;
     }
 
+    // Clean background
     matrix->Fill(flood_color.r, flood_color.g, flood_color.b);
+
+    // Draw Text
     for (int i = 0; i < MENU_OPTIONS_COUNT; i++)
     {
         const char* text;
@@ -98,7 +106,7 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
         rgb_matrix::DrawText(matrix, font, x_orig, y_orig + i * y_scale, color, &bg_color, text, letter_spacing);
     }
 
-    rgb_matrix::DrawCircle(matrix, x_orig - 5, y_orig - 3 + selectedOption*y_scale, 2, color);
+    rgb_matrix::DrawCircle(matrix, x_orig - x_marker_shift, y_orig - y_marker_shift + selectedOption*y_scale, marker_radius, color);
 
     return -1;
 }
