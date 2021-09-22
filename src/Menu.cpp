@@ -15,7 +15,7 @@ void Menu::upOption()
 
 void Menu::downOption()
 {
-    selectedOption = (selectedOption == TetrisMenuOption) ? RestartMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)+1);
+    selectedOption = (selectedOption == RestartMenuOption) ? TetrisMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)+1);
 }
 
 void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
