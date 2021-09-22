@@ -6,10 +6,6 @@
 
 using namespace rgb_matrix;
 
-int Menu::selectedOption = TetrisMenuOption;
-
-bool Menu::prevInputs[TOTAL_INPUTS];
-
 void Menu::upOption()
 {
     selectedOption = (selectedOption == TetrisMenuOption) ? RestartMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)-1);
@@ -18,6 +14,16 @@ void Menu::upOption()
 void Menu::downOption()
 {
     selectedOption = (selectedOption == RestartMenuOption) ? TetrisMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)+1);
+}
+
+Menu::Menu()
+{
+    Reset();
+}
+
+Menu::~Menu()
+{
+    
 }
 
 void Menu::Reset()
@@ -56,7 +62,7 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 
     const int x_orig = 10;
     const int y_orig = 10;
-    const int y_scale = 10;
+    const int y_scale = 12;
     const int letter_spacing = 0;
     
     // Load font
@@ -88,7 +94,7 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
         rgb_matrix::DrawText(matrix, font, x_orig, y_orig + i * y_scale, color, &bg_color, text, letter_spacing);
     }
 
-    rgb_matrix::DrawCircle(matrix, x_orig - x_orig/2, y_orig - y_scale/4 + selectedOption*y_scale, 2, color);
+    rgb_matrix::DrawCircle(matrix, x_orig - 5, y_orig - 3 + selectedOption*y_scale, 2, color);
 
     return -1;
 }

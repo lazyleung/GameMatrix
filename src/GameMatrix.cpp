@@ -217,8 +217,8 @@ int main(int argc, char *argv[])
 	DrawOnCanvas(matrix);
 
 	// Init Engine Resources
+	Menu *m = new Menu();
 	Tetris *t  = new Tetris();
-	Menu::Reset();
 
 	// Enabel KB mode if specified  by cmdline arg
 	isKB = false;
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 		switch (matrixMode)
 		{
 			case MenuMode:
-				switch (Menu::Loop(matrix, inputs))
+				switch (m->Loop(matrix, inputs))
 				{
 					case TetrisMenuOption:
 						matrixMode = TetrisMode;
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
 				break;
 			case PokemonMode:
 				matrixMode = MenuMode;
-				Menu::Reset();
+				m->Reset();
 				break;
 			default:
 				break;

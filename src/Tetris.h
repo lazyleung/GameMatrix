@@ -107,7 +107,7 @@ class Tetris
         void clearPieceBag();
 
     public:
-        Tetris(/* args */);
+        Tetris();
         ~Tetris();
 
         void InitTetris();

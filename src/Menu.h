@@ -22,11 +22,14 @@ using namespace rgb_matrix;
 class Menu
 {
     private:
-        static int selectedOption;
-        static bool prevInputs[TOTAL_INPUTS];
-        static void upOption();
-        static void downOption();
+        int selectedOption;
+        bool prevInputs[TOTAL_INPUTS];
+        void upOption();
+        void downOption();
     public:
-        static void Reset();
-        static int Loop(RGBMatrix *canvas, volatile bool *inputs);
+        Menu();
+        ~Menu();
+
+        void Reset();
+        int Loop(RGBMatrix *canvas, volatile bool *inputs);
 };
