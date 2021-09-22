@@ -199,10 +199,14 @@ void Tetris::InitTetris()
     gravityCount = 0;
     clearCount = 0;
 
+    std::cout << "Adding piecies..." << std::endl;
+
     srand(time(NULL));
     clearPieceBag();
     addPiece();
     addPiece();
+
+    std::cout << "Tetris Init Complete!" << std::endl;
 }
 
 void Tetris::CleanupTetris()

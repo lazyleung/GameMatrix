@@ -38,30 +38,6 @@ static bool isKB;
 
 volatile bool inputs[TOTAL_INPUTS];
 
-static void DrawOnCanvas(RGBMatrix *matrix) {
-	/*
-	* Let's create a simple animation. We use the canvas to draw
-	* pixels. We wait between each step to have a slower animation.
-	*/
-
-	FrameCanvas *canvas = matrix->CreateFrameCanvas();
-	matrix->Fill(0, 0, 255);
-
-	int center_x = canvas->width() / 2;
-	int center_y = canvas->height() / 2;
-	float radius_max = canvas->width() / 2;
-	float angle_step = 1.0 / 360;
-	for (float a = 0, r = 0; r < radius_max; a += angle_step, r += angle_step) {
-		if (interrupt_received)
-		return;
-		float dot_x = cos(a * 2 * M_PI) * r;
-		float dot_y = sin(a * 2 * M_PI) * r;
-		matrix->SetPixel(center_x + dot_x, center_y + dot_y,
-						255, 0, 0);
-		usleep(1 * 30);  // wait a little to slow down things.
-	}
-}
-
 // Check if there is any input on the unbuffered terminal
 bool inputAvailable()
 {
@@ -211,11 +187,6 @@ int main(int argc, char *argv[])
 			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
 	}
 
-	_running = true;
-
-	// StartUp Animation
-	DrawOnCanvas(matrix);
-
 	// Init Engine Resources
 	Menu *m = new Menu();
 	Tetris *t  = new Tetris();
@@ -232,6 +203,8 @@ int main(int argc, char *argv[])
 			enableTerminalInput();
 		}
 	}
+
+	_running = true;
 
 	// Game Engine
 	while (!interrupt_received && _running)
