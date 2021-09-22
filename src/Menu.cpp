@@ -41,13 +41,11 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     if (inputs[UpStick] && !prevInputs[UpStick])
     {
         upOption();
-        inputs[UpStick] = false;
     }
     
     if (inputs[DownStick] && !prevInputs[DownStick])
     {
         downOption();
-        inputs[DownStick] = false;
     }
 
     if (inputs[AButton] && !prevInputs[AButton])
@@ -58,6 +56,7 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     for (int i = 0; i < TOTAL_INPUTS; i++)
     {
         prevInputs[i] = inputs[i];
+        inputs[i] = false;
     }
     
     Color color(255, 255, 0);
