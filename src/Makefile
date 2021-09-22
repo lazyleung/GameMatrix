@@ -1,6 +1,6 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
 CXXFLAGS=$(CFLAGS)
-OBJECTS=GameMatrix.o Tetris.o
+OBJECTS=GameMatrix.o Tetris.o Menu.o
 BINARIES=GameMatrix.app
 
 # Where our library resides. You mostly only need to change the

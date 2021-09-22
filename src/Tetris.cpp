@@ -214,7 +214,7 @@ void Tetris::CleanupTetris()
     }
 }
 
-Tetris::Tetris(/* args */)
+Tetris::Tetris()
 {
     InitTetris();
 }
@@ -349,48 +349,48 @@ void Tetris::PlayTetris(volatile bool *inputs)
             // Immediately react on button down
             // Set a delay before input is recognized again
             // This delay is shorter if button is being held
-            if (inputDelayCounts[Left] == 0 && inputs[Left] && !inputs[Up] && !inputs[Down])
+            if (inputDelayCounts[LeftStick] == 0 && inputs[LeftStick] && !inputs[UpStick] && !inputs[DownStick])
             {
-                if (!prevInputs[Left])
+                if (!prevInputs[LeftStick])
                 {
-                    inputDelayCounts[Left] = INPUT_DELAY_TARGET;
+                    inputDelayCounts[LeftStick] = INPUT_DELAY_TARGET;
                 }
                 else
                 {
-                    inputDelayCounts[Left] = INPUT_DELAY_TARGET/2;
+                    inputDelayCounts[LeftStick] = INPUT_DELAY_TARGET/2;
                 }
                 
                 xShift--;
             }
 
-            if (inputDelayCounts[Right] == 0 && inputs[Right] && !inputs[Up] && !inputs[Down])
+            if (inputDelayCounts[RightStick] == 0 && inputs[RightStick] && !inputs[UpStick] && !inputs[DownStick])
             {
-                if (!prevInputs[Right])
+                if (!prevInputs[RightStick])
                 {
-                    inputDelayCounts[Right] = INPUT_DELAY_TARGET;
+                    inputDelayCounts[RightStick] = INPUT_DELAY_TARGET;
                 }
                 else
                 {
-                    inputDelayCounts[Right] = INPUT_DELAY_TARGET/2;
+                    inputDelayCounts[RightStick] = INPUT_DELAY_TARGET/2;
                 }
                 xShift++;
             }
 
-            if (inputDelayCounts[Down] == 0 && inputs[Down] && !inputs[Left] && !inputs[Right])
+            if (inputDelayCounts[DownStick] == 0 && inputs[DownStick] && !inputs[LeftStick] && !inputs[RightStick])
             {
-                if (!prevInputs[Down])
+                if (!prevInputs[DownStick])
                 {
-                    inputDelayCounts[Down] = INPUT_DELAY_TARGET;
+                    inputDelayCounts[DownStick] = INPUT_DELAY_TARGET;
                 }
                 else
                 {
-                    inputDelayCounts[Down] = INPUT_DELAY_TARGET/2;
+                    inputDelayCounts[DownStick] = INPUT_DELAY_TARGET/2;
                 }
                 yshift--;
             }
 
             // Only on button down
-            if (!prevInputs[A] && inputs[A])
+            if (!prevInputs[AButton] && inputs[AButton])
             {
                 rotateState = CounterClockwise;
             }

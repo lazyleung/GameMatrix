@@ -1,6 +1,7 @@
 #include "led-matrix.h"
 #include "Tetris.h"
 #include "Inputs.h"
+#include "Menu.h"
 
 #include "pixel-mapper.h"
 #include "graphics.h"
@@ -16,11 +17,16 @@
 #include <wiringPi.h>
 #include <mcp23017.h>
 
-#define GPIO_OFFSET 64
-
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
+
+enum MatrixMode {
+	MenuMode,
+	TetrisMode,
+	PokemonMode
+};
+static MatrixMode matrixMode;
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -56,7 +62,6 @@ static void DrawOnCanvas(RGBMatrix *matrix) {
 	}
 }
 
-
 // Check if there is any input on the unbuffered terminal
 bool inputAvailable()
 {
@@ -86,35 +91,35 @@ static void getch()
 		case 'w': // Up
 		case 'k':
 		{
-			inputs[Up] = true;
+			inputs[UpStick] = true;
 			break;
 		}
 		case 's': // Down
 		case 'j':
 		{
-			inputs[Down] = true;
+			inputs[DownStick] = true;
 			break;
 		}
 		case 'a': // Left
 		case 'h':
 		{
-			inputs[Left] = true;
+			inputs[LeftStick] = true;
 			break;
 		}
 		case 'd': // Right
 		case 'l':
 		{
-			inputs[Right] = true;
+			inputs[RightStick] = true;
 			break;
 		}
 		case 'q': // Rotate
 		{
-			inputs[A] = true;
+			inputs[AButton] = true;
 			break;
 		}
 		case 'e': // Rotate
 		{
-			inputs[B] = true;
+			inputs[BButton] = true;
 			break;
 		}
 		// Exit program
@@ -122,7 +127,7 @@ static void getch()
 		case 0x04:           // End of file
 		case 0x00:           // Other issue from getch()
 		{
-			inputs[Menu] = true;
+			inputs[MenuButton] = true;
 			break;
 		}
 	}
@@ -164,7 +169,10 @@ static void getArcadeInput()
 	}
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) 
+{
+	matrixMode = MenuMode;
+
 	RGBMatrix::Options defaults;
 	defaults.hardware_mapping = "adafruit-hat-pwm";
 	defaults.rows = 32;
@@ -205,7 +213,7 @@ int main(int argc, char *argv[]) {
 
 	_running = true;
 
-	Tetris *t = new Tetris();
+	Tetris *t  = new Tetris();
 
 	// StartUp Animation
 	DrawOnCanvas(matrix);
@@ -237,8 +245,20 @@ int main(int argc, char *argv[]) {
 			getArcadeInput();
 		}
 
-		t->PlayTetris(inputs);
-		t->DrawTetris(matrix);
+		switch (matrixMode)
+		{
+			case MenuMode:
+				Menu::Loop(matrix, inputs);
+				break;
+			case TetrisMode:
+				t->PlayTetris(inputs);
+				t->DrawTetris(matrix);
+				break;
+			case PokemonMode:
+				break;
+			default:
+				break;
+		}
 	}
 
 	if (isKB)
