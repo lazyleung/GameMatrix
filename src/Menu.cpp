@@ -39,7 +39,7 @@ void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     Color flood_color(0, 0, 0);
     Color outline_color(0,0,0);
 
-    int x_orig = 10;
+    int x_orig = 8;
     int y_orig = 10;
     int letter_spacing = 0;
     
@@ -51,7 +51,7 @@ void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     }
 
     //int x_scale = 20;
-    int y_scale = 15;
+    int y_scale = 10;
 
     matrix->Clear();
     for (int i = 0; i < MENU_OPTIONS_COUNT; i++)
@@ -76,7 +76,7 @@ void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 
         if (selectedOption == i)
         {
-            rgb_matrix::DrawCircle(matrix, x_orig - 3, y_orig + i * y_scale + 3 , 5, color);
+            rgb_matrix::DrawCircle(matrix, x_orig - 4, y_orig + i * y_scale , 2, color);
         }
     }
 
