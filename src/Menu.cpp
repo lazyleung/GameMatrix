@@ -6,7 +6,8 @@
 
 using namespace rgb_matrix;
 
-int Menu::selectedOption;
+int Menu::selectedOption = TetrisMenuOption;
+bool Menu::isOptionsDrawn = false;
 
 void Menu::upOption()
 {
@@ -20,8 +21,6 @@ void Menu::downOption()
 
 void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 {
-    
-
     if (inputs[UpStick])
     {
         upOption();
@@ -41,44 +40,42 @@ void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 
     int x_orig = 8;
     int y_orig = 10;
+    int y_scale = 10;
     int letter_spacing = 0;
     
-    // Load font
-    rgb_matrix::Font font;
-    if (!font.LoadFont(FONT_FILE)) {
-        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
-        return;
-    }
-
-    //int x_scale = 20;
-    int y_scale = 10;
-
-    matrix->Clear();
-    for (int i = 0; i < MENU_OPTIONS_COUNT; i++)
-    {
-        const char* text;
-        switch (i)
-        {
-            case TetrisMenuOption:
-                text = "Tetris";
-                break;
-            case PokemonMenuOption:
-                text = "Pokemon";
-                break;
-            case RestartMenuOption:
-                text = "Restart";
-                break;
-            
-            default:
-                break;
+    //if (!isOptionsDrawn)
+    //{
+        // Load font
+        rgb_matrix::Font font;
+        if (!font.LoadFont(FONT_FILE)) {
+            fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
+            return;
         }
-        rgb_matrix::DrawText(matrix, font, x_orig, y_orig + i * y_scale, color, &bg_color, text, letter_spacing);
 
-        if (selectedOption == i)
+        matrix->Fill(flood_color.r, flood_color.g, flood_color.b);
+        for (int i = 0; i < MENU_OPTIONS_COUNT; i++)
         {
-            rgb_matrix::DrawCircle(matrix, x_orig - 4, y_orig + i * y_scale , 2, color);
+            const char* text;
+            switch (i)
+            {
+                case TetrisMenuOption:
+                    text = "Tetris";
+                    break;
+                case PokemonMenuOption:
+                    text = "Pokemon";
+                    break;
+                case RestartMenuOption:
+                    text = "Restart";
+                    break;
+                
+                default:
+                    break;
+            }
+            rgb_matrix::DrawText(matrix, font, x_orig, y_orig + i * y_scale, color, &bg_color, text, letter_spacing);
         }
-    }
+
+        rgb_matrix::DrawCircle(matrix, x_orig - 4, y_orig + selectedOption * y_scale / 2 , 2, color);
+    //}
 
     return;
 }

@@ -21,6 +21,7 @@ class Menu
 {
     private:
         static int selectedOption;
+        static bool isOptionsDrawn;
         static void upOption();
         static void downOption();
     public:
