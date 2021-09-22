@@ -257,8 +257,9 @@ int main(int argc, char *argv[])
 						matrixMode = PokemonMode;
 						break;
 					case RestartMenuOption:
-					default:
 						_running = false;
+						break;
+					default:
 						break;
 				}
 				break;
