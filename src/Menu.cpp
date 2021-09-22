@@ -20,6 +20,8 @@ void Menu::downOption()
 
 void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 {
+    
+
     if (inputs[UpStick])
     {
         upOption();
@@ -51,6 +53,7 @@ void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     //int x_scale = 20;
     int y_scale = 20;
 
+    matrix->Clear();
     for (int i = 0; i < MENU_OPTIONS_COUNT; i++)
     {
         const char* text;
