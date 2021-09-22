@@ -74,7 +74,7 @@ void Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
             rgb_matrix::DrawText(matrix, font, x_orig, y_orig + i * y_scale, color, &bg_color, text, letter_spacing);
         }
 
-        rgb_matrix::DrawCircle(matrix, x_orig - x_orig/2, y_orig - y_scale/2 + selectedOption*y_scale, 2, color);
+        rgb_matrix::DrawCircle(matrix, x_orig - x_orig/2, y_orig - y_scale/4 + selectedOption*y_scale, 2, color);
     //}
 
     return;
