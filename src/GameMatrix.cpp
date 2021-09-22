@@ -213,11 +213,14 @@ int main(int argc, char *argv[])
 
 	_running = true;
 
-	Tetris *t  = new Tetris();
-
 	// StartUp Animation
 	DrawOnCanvas(matrix);
 
+	// Init Engine Resources
+	Tetris *t  = new Tetris();
+	Menu::Reset();
+
+	// Enabel KB mode if specified  by cmdline arg
 	isKB = false;
 	if (argc > 1 && isatty(STDIN_FILENO))
 	{
@@ -272,6 +275,7 @@ int main(int argc, char *argv[])
 				break;
 			case PokemonMode:
 				matrixMode = MenuMode;
+				Menu::Reset();
 				break;
 			default:
 				break;

@@ -7,7 +7,6 @@
 using namespace rgb_matrix;
 
 int Menu::selectedOption = TetrisMenuOption;
-bool Menu::isOptionsDrawn = false;
 
 bool Menu::prevInputs[TOTAL_INPUTS];
 
@@ -19,6 +18,11 @@ void Menu::upOption()
 void Menu::downOption()
 {
     selectedOption = (selectedOption == RestartMenuOption) ? TetrisMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)+1);
+}
+
+void Menu::Reset()
+{
+    selectedOption = TetrisMenuOption;
 }
 
 int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
