@@ -386,6 +386,10 @@ int Tetris::PlayTetris(volatile bool *inputs)
             {
                 rotateState = CounterClockwise;
             }
+            if (!prevInputs[BButton] && inputs[BButton])
+            {
+                rotateState = Clockwise;
+            }
             if (!prevInputs[MenuButton] && inputs[MenuButton])
             {
                 return -1;
