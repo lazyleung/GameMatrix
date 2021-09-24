@@ -104,13 +104,17 @@ void AlsaInput::input_audio()
     // Absolute value of all samples will stay wihin [0, 1]
     const float norm = 1.0f / (32768.0f * std::sqrt(2.0f));
 
-    std::vector<uint8_t> buffer(frames * stride);
+    // std::vector<uint8_t> buffer(frames * stride);
+    // std::vector<std::vector<uint8_t>> bufs(frames * stride * channels);
+
+    uint8_t bufs[channels][frames * stride];
+
     std::vector<Sample> data(frames);
-    std::vector<std::vector<uint8_t>> bufs(frames * stride * channels);
+    
 
     // Let's rock
     while (!isStopped) {
-        int n = snd_pcm_readn(handle, reinterpret_cast<void**>(bufs.data()), frames);
+        int n = snd_pcm_readn(handle, reinterpret_cast<void**>(bufs), frames);
         if (n == -EPIPE) {
             std::cerr << "Overrun occurred" << std::endl;
             // Try to recover
@@ -119,8 +123,8 @@ void AlsaInput::input_audio()
             std::cerr << "Error from read: " << snd_strerror(n) << std::endl;
         } else {
             // For 32 and 24 bit, we'll drop the extra precision
-            int8_t* pleft = reinterpret_cast<int8_t*>(buffer.data() + loff);
-            int8_t* pright = reinterpret_cast<int8_t*>(buffer.data() + roff);
+            int8_t* pleft = reinterpret_cast<int8_t*>(bufs[0]);
+            int8_t* pright = reinterpret_cast<int8_t*>(bufs[0]);
             for (int i = 0; i < n; i++) {
                 // Store normalized data within [-1, 1) range
                 data[i] = Sample(*(int16_t*)pleft, *(int16_t*)pright) * norm;
