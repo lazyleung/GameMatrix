@@ -8,7 +8,7 @@
 AlsaInput::AlsaInput(volatile bool isStopped , std::shared_ptr<ThreadSync> ts)
     : AudioInput(isStopped, ts)
 {
-    const char* audio_source = "hw:CARD=audioinjectorpi,DEV=0";
+    const char* audio_source = "hw:CARD=Device,DEV=0";
 
     // Open ALSA device to capture audio
     int err = snd_pcm_open(&handle, audio_source, SND_PCM_STREAM_CAPTURE, 0);
