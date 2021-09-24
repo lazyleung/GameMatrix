@@ -21,7 +21,7 @@ AlsaInput::AlsaInput(volatile bool isStopped , std::shared_ptr<ThreadSync> ts)
     snd_pcm_hw_params_any(handle, params); // Set everything to defaults
 
     // Non-Interleaved
-    snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_NONINTERLEAVED );
+    err = snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_NONINTERLEAVED );
 
     // Trying to set 16bit
     snd_pcm_format_t pcm_format = SND_PCM_FORMAT_S16_LE;
