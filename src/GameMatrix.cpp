@@ -191,6 +191,7 @@ int main(int argc, char *argv[])
 	// Init Engine Resources
 	std::shared_ptr<ThreadSync> sync = std::make_shared<ThreadSync>();
 	std::shared_ptr<AlsaInput> audio = std::make_shared<AlsaInput>(interrupt_received, sync);
+	audio->start_thread();
 
 	Menu *m = new Menu();
 	Tetris *t  = new Tetris();
@@ -232,7 +233,6 @@ int main(int argc, char *argv[])
 				{
 					case TetrisMenuOption:
 						matrixMode = TetrisMode;
-						audio->start_thread();
 						break;
 					case PokemonMenuOption:
 						matrixMode = PokemonMode;
