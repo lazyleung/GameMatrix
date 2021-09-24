@@ -232,6 +232,7 @@ int main(int argc, char *argv[])
 				{
 					case TetrisMenuOption:
 						matrixMode = TetrisMode;
+						audio->start_thread();
 						break;
 					case PokemonMenuOption:
 						matrixMode = PokemonMode;
