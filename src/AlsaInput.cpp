@@ -80,6 +80,8 @@ AlsaInput::AlsaInput(volatile bool isStopped , std::shared_ptr<ThreadSync> ts)
     snd_pcm_hw_params_get_period_size(params, &frames, NULL);
     snd_pcm_hw_params_get_channels(params, &channels);
 
+    std::cout << "Alsa configured!" << std::endl;
+
     // Hope it's successful
     if (format == -1 || rate == 0) {
         std::cerr << "Could not get rate and/or format, quiting..." << std::endl;
