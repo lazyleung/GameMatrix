@@ -26,7 +26,7 @@ void Menu::downOption()
 
 Menu::Menu()
 {
-    Reset();
+    Reset(); 
 }
 
 Menu::~Menu()

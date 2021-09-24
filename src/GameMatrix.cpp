@@ -2,6 +2,7 @@
 #include "Tetris.h"
 #include "Inputs.h"
 #include "Menu.h"
+#include "AlsaInput.h"
 
 #include "pixel-mapper.h"
 #include "graphics.h"
@@ -188,6 +189,9 @@ int main(int argc, char *argv[])
 	}
 
 	// Init Engine Resources
+	std::shared_ptr<ThreadSync> sync = std::make_shared<ThreadSync>();
+	std::shared_ptr<AlsaInput> audio = std::make_shared<AlsaInput>(interrupt_received, sync);
+
 	Menu *m = new Menu();
 	Tetris *t  = new Tetris();
 
@@ -254,6 +258,8 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
+
+	interrupt_received = true;
 
 	if (isKB)
 	{
