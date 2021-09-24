@@ -1,4 +1,4 @@
-CFLAGS=-Wall -O0 -g -Wextra -Wno-unused-parameter
+CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
 CXXFLAGS=$(CFLAGS)
 OBJECTS=GameMatrix.o Tetris.o Menu.o ThreadSync.o AudioInput.o AlsaInput.o
 BINARIES=GameMatrix.app

@@ -20,7 +20,7 @@ AlsaInput::AlsaInput(volatile bool isStopped , std::shared_ptr<ThreadSync> ts)
     snd_pcm_hw_params_alloca(&params); // Allocate parameters on stack
     snd_pcm_hw_params_any(handle, params); // Set everything to defaults
 
-    // Non-Interleaved
+    // Set Access
     err = snd_pcm_hw_params_set_access(handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
 
     // Trying to set 16bit
@@ -103,19 +103,12 @@ void AlsaInput::input_audio()
 
     // Absolute value of all samples will stay wihin [0, 1]
     const float norm = 1.0f / (32768.0f * std::sqrt(2.0f));
-
-    // int8_t** bufs = new int8_t*[channels];
-    // for (unsigned int i = 0; i < channels; i++)
-    // {
-    //      bufs[i] = new int8_t[frames * stride];
-    // }
     
     std::vector<uint8_t> buffer(frames * stride);
     std::vector<Sample> data(frames);
 
     // Let's rock
     while (!isStopped) {
-        // int n = snd_pcm_readn(handle, (void**)bufs, frames);
         int n = snd_pcm_readi(handle, buffer.data(), frames);
         if (n == -EPIPE) {
             std::cerr << "Overrun occurred" << std::endl;
@@ -127,19 +120,13 @@ void AlsaInput::input_audio()
             // For 32 and 24 bit, we'll drop the extra precision
             int8_t* pleft = reinterpret_cast<int8_t*>(buffer.data() + loff);
             int8_t* pright = reinterpret_cast<int8_t*>(buffer.data() + roff);
-
-            // For 32 and 24 bit, we'll drop the extra precision
-            // int8_t* pleft = reinterpret_cast<int8_t*>(bufs[0]);
-            // int8_t* pright = reinterpret_cast<int8_t*>(bufs[0]);
             for (int i = 0; i < n; i++) {
                 // Store normalized data within [-1, 1) range
                 data[i] = Sample(*(int16_t*)pleft, *(int16_t*)pright) * norm;
                 pleft += stride;
                 pright += stride;
 
-                std::cout << " " << data[i];
             }
-            std::cout << std::endl;
             sync->produce([&] { samples->write(data.data(), n); });
         }
     }
