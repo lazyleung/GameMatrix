@@ -3,7 +3,6 @@
 #include <cinttypes>
 #include <iostream>
 #include <stdlib.h>
-#include <vector>
 
 AlsaInput::AlsaInput(volatile bool isStopped , std::shared_ptr<ThreadSync> ts)
     : AudioInput(isStopped, ts)
@@ -107,10 +106,11 @@ void AlsaInput::input_audio()
 
     std::vector<uint8_t> buffer(frames * stride);
     std::vector<Sample> data(frames);
+    std::vector<std::vector<uint8_t>> bufs(frames * stride * channels);
 
     // Let's rock
     while (!isStopped) {
-        int n = snd_pcm_readi(handle, buffer.data(), frames);
+        int n = snd_pcm_readn(handle, reinterpret_cast<void**>(bufs.data()), frames);
         if (n == -EPIPE) {
             std::cerr << "Overrun occurred" << std::endl;
             // Try to recover
@@ -126,8 +126,10 @@ void AlsaInput::input_audio()
                 data[i] = Sample(*(int16_t*)pleft, *(int16_t*)pright) * norm;
                 pleft += stride;
                 pright += stride;
-            }
 
+                std::cout << " " << data[i];
+            }
+            std::cout << std::endl;
             sync->produce([&] { samples->write(data.data(), n); });
         }
     }

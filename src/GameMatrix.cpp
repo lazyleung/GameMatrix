@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 	defaults.pixel_mapper_config = "U-Mapper";
 
 	defaults.limit_refresh_rate_hz = 120;
-	defaults.show_refresh_rate = true;
+	defaults.show_refresh_rate = false;
 
 	rgb_matrix::RuntimeOptions rtOptions;
 	rtOptions.gpio_slowdown = 4;

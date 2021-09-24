@@ -143,7 +143,7 @@ void Tetris::addPiece()
     // Insert base piece
     if (pieceBag == 0xFF)
     {
-        std::cout << "PieceBag Full!" << std::endl;
+        // std::cout << "PieceBag Full!" << std::endl;
         pieceBag = 0x80;
     }
     int shape = 7;
@@ -160,7 +160,7 @@ void Tetris::addPiece()
             // Piece valid!
             isPieceSelected = true;
             pieceBag = pieceBag | (0x01 << shape);
-            std::cout << "Shape Added: " << shape << std::endl;
+            // std::cout << "Shape Added: " << shape << std::endl;
         }
     }
     nextShape = shape;
