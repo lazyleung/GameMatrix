@@ -187,6 +187,7 @@ void Tetris::InitTetris()
     defaultColorShift = 0;
     gravityCount = 0;
     clearCount = 0;
+    nextShape = 0;
 
     srand(time(NULL));
     clearPieceBag();
