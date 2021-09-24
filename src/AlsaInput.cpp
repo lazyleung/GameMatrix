@@ -120,7 +120,7 @@ void AlsaInput::input_audio()
 
     // Let's rock
     while (!isStopped) {
-        int n = snd_pcm_readn(handle, reinterpret_cast<void**>(bufs), frames);
+        int n = snd_pcm_readn(handle, (void**)bufs, frames);
         if (n == -EPIPE) {
             std::cerr << "Overrun occurred" << std::endl;
             // Try to recover
