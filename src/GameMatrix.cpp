@@ -18,6 +18,8 @@
 #include <wiringPi.h>
 #include <mcp23017.h>
 
+#include <aubio.h>
+
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
