@@ -3,4 +3,4 @@
 	url = https://github.com/lazyleung/rpi-rgb-led-matrix.git
 [submodule "aubio"]
 	path = aubio
-	url = https://github.com/aubio/aubio.git
+	url = https://github.com/lazyleung/aubio.git
