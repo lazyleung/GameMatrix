@@ -3,6 +3,7 @@
 #include "Inputs.h"
 #include "Menu.h"
 #include "AlsaInput.h"
+#include "WaveletBpmDetector.h"
 
 #include "pixel-mapper.h"
 #include "graphics.h"
@@ -17,8 +18,6 @@
 
 #include <wiringPi.h>
 #include <mcp23017.h>
-
-#include <aubio.h>
 
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
@@ -159,7 +158,7 @@ int main(int argc, char *argv[])
 
 	defaults.parallel = 1;
 	defaults.chain_length = 4;
-	defaults.pixel_mapper_config = "U-Mapper";
+	defaults.pixel_mapper_config = "U-Mapper;Rotate:180";
 
 	defaults.limit_refresh_rate_hz = 120;
 	defaults.show_refresh_rate = false;
@@ -193,7 +192,18 @@ int main(int argc, char *argv[])
 	// Init Engine Resources
 	std::shared_ptr<ThreadSync> sync = std::make_shared<ThreadSync>();
 	std::shared_ptr<AlsaInput> audio = std::make_shared<AlsaInput>(interrupt_received, sync);
-	audio->start_thread();
+	int64_t last_read = 0;
+    unsigned int last_written = 0;
+	int64_t windowSize = 131072;
+	std::vector<Sample> values;
+	std::vector<float> data;
+	std::shared_ptr<FreqData> freq =  std::make_shared<FreqData>(2048, audio->get_rate());
+	WaveletBPMDetector detector = WaveletBPMDetector(12, windowSize, freq);
+	CircularBuffer<float> amps = CircularBuffer<float>(windowSize * 2);
+
+	using Timestamp = std::chrono::steady_clock::time_point;
+    using Duration = std::chrono::steady_clock::duration;
+	//SlidingMedian<float, Timestamp, Duration> slide = SlidingMedian(std::chrono::seconds(5));
 
 	Menu *m = new Menu();
 	Tetris *t  = new Tetris();
@@ -238,6 +248,7 @@ int main(int argc, char *argv[])
 						break;
 					case PokemonMenuOption:
 						matrixMode = PokemonMode;
+						audio->start_thread();
 						break;
 					case RestartMenuOption:
 						_running = false;
@@ -254,8 +265,44 @@ int main(int argc, char *argv[])
 				t->DrawTetris(matrix);
 				break;
 			case PokemonMode:
-				matrixMode = MenuMode;
-				m->Reset();
+				sync->consume([&] 
+				{
+					return !_running || (audio->get_data()->get_latest() >= windowSize);
+				},
+				[&] 
+				{
+					if (_running)
+					{
+						last_written = std::min(audio->get_data()->get_latest() - last_read, windowSize);
+                    	last_read = audio->get_data()->read_at(last_read, values.data(), last_written);
+					}
+				},
+				[&] 
+				{
+					if (_running)
+					{
+						// Write latest amp values to avoid calculating them twice
+						for (unsigned int i = 0; i < last_written; ++i) {
+							data[i] = std::abs(values[i]);
+						}
+						amps.write(data.data(), last_written);
+
+						// Now read back the whole window
+						amps.read(data.data(), windowSize);
+
+						float bpm = detector.computeWindowBpm(data);
+						//bpm = slide.offer(std::make_pair(bpm, std::chrono::steady_clock::now()));
+						// if (!global->lock_bpm) {
+						// 	global->bpm = bpm;
+						// }
+						// std::cout << "Window BPM: " << bpm << std::endl << std::flush;
+						if (m->TestLoop(matrix, inputs, std::to_string(bpm).c_str()) == -1)
+						{
+							matrixMode = MenuMode;
+							m->Reset();
+						}
+					}
+				});				
 				break;
 			default:
 				break;
@@ -263,6 +310,7 @@ int main(int argc, char *argv[])
 	}
 
 	interrupt_received = true;
+	audio->join_thread();
 
 	if (isKB)
 	{

@@ -1,6 +1,6 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
 CXXFLAGS=$(CFLAGS)
-OBJECTS=GameMatrix.o Tetris.o Menu.o ThreadSync.o AudioInput.o AlsaInput.o
+OBJECTS=GameMatrix.o Tetris.o Menu.o ThreadSync.o AudioInput.o AlsaInput.o WaveletBpmDetector.o wavelet.o freq_data.o
 BINARIES=GameMatrix.app
 
 # Where our library resides. You mostly only need to change the
@@ -11,23 +11,14 @@ RGB_LIBDIR=$(RGB_LIB_DISTRIBUTION)/lib
 RGB_LIBRARY_NAME=rgbmatrix
 RGB_LIBRARY=$(RGB_LIBDIR)/lib$(RGB_LIBRARY_NAME).a
 
-AUBIO_DISTRIBUTION=$(realpath ..)/aubio
-AUBIO_INCDIR=$(AUBIO_DISTRIBUTION)/src
-AUBIO_LIBDIR=$(AUBIO_DISTRIBUTION)/build/src
-AUBIO_LIBRARY_NAME=aubio
-AUBIO_LIBRARY=$(AUBIO_LIBDIR)/lib$(AUBIO_LIBRARY_NAME).a
-
-LDFLAGS+=-L$(RGB_LIBDIR) -L$(AUBIO_LIBDIR) -l$(RGB_LIBRARY_NAME) -l$(AUBIO_LIBRARY_NAME) -lrt -lm -lpthread -lwiringPi -lasound
+LDFLAGS+=-L$(RGB_LIBDIR) -l$(RGB_LIBRARY_NAME) -lrt -lm -lpthread -lwiringPi -lasound -lfftw3
 
 all : $(BINARIES)
 
 $(RGB_LIBRARY) : FORCE
 	$(MAKE) -C $(RGB_LIBDIR)
 
-$(AUBIO_LIBRARY) : FORCE
-	$(MAKE) -C $(AUBIO_DISTRIBUTION)
-
-GameMatrix.app : $(OBJECTS) $(RGB_LIBRARY) $(AUBIO_LIBRARY)
+GameMatrix.app : $(OBJECTS) $(RGB_LIBRARY)
 	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 # All the binaries that have the same name as the object file.

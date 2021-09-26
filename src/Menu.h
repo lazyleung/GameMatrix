@@ -32,4 +32,5 @@ class Menu
 
         void Reset();
         int Loop(RGBMatrix *canvas, volatile bool *inputs);
+        int TestLoop(RGBMatrix *matrix, volatile bool *inputs, const char* text);
 };

@@ -53,6 +53,8 @@
         "bitset": "cpp",
         "complex": "cpp",
         "condition_variable": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "cstring": "cpp",
+        "set": "cpp"
     }
 }

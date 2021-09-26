@@ -110,3 +110,38 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 
     return -1;
 }
+
+int Menu::TestLoop(RGBMatrix *matrix, volatile bool *inputs, const char* text)
+{
+     // Proccess inputs on button down
+    if (inputs[MenuButton] && !prevInputs[MenuButton])
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < TOTAL_INPUTS; i++)
+    {
+        prevInputs[i] = inputs[i];
+        inputs[i] = false;
+    }
+
+    // Draw Menu
+    Color color(255, 255, 0);
+    Color bg_color(0, 0, 0);
+    Color flood_color(0, 0, 0);
+    
+    // Load font
+    rgb_matrix::Font font;
+    if (!font.LoadFont(FONT_FILE)) {
+        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
+        return -1;
+    }
+
+    // Clean background
+    matrix->Fill(flood_color.r, flood_color.g, flood_color.b);
+
+    // Draw Text
+    rgb_matrix::DrawText(matrix, font, x_orig, y_orig , color, &bg_color, text, letter_spacing);
+
+    return 0;
+}
