@@ -7,6 +7,8 @@
 #include <cstring>
 #include <numeric>
 
+#include <fftw3.h>
+
 WaveletBPMDetector::WaveletBPMDetector(int rate, int size, std::shared_ptr<FreqData> data)
     : sampleRate(rate)
     , windowSize(size)
