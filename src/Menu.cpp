@@ -137,7 +137,7 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
             inputs[i] = false;
         }
         
-        return selectedOption;
+        return -1;
     }
 
     for (int i = 0; i < TOTAL_INPUTS; i++)
@@ -169,8 +169,7 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     // const char* text;
     rgb_matrix::DrawText(matrix, font, 10, 32, color, &bg_color, dt, letter_spacing);
 
-
-    return -1;
+    return 0;
 }
 
 int Menu::TestLoop(RGBMatrix *matrix, volatile bool *inputs, const char* text)
