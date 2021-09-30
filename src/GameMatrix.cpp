@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 					case ClockMenuOption:
 						break;
 					case RotateMenuOption:
-						p = FindPixelMapper("U-Mapper", 4, 1);
+						p = FindPixelMapper("Rotate", 4, 1, "90");
 						r = matrix->ApplyPixelMapper(p);
 						std::cout << "Rotate!" << std::endl;
 						break;
