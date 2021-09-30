@@ -229,6 +229,9 @@ int main(int argc, char *argv[])
 
 	_running = true;
 
+	const PixelMapper *p;
+	bool r;
+
 	// Game Engine
 	while (!interrupt_received && _running)
 	{
@@ -258,7 +261,9 @@ int main(int argc, char *argv[])
 					case ClockMenuOption:
 						break;
 					case RotateMenuOption:
-						matrix->ApplyPixelMapper(FindPixelMapper("U-Mapper", 4, 1));
+						p = FindPixelMapper("U-Mapper", 4, 1);
+						r = matrix->ApplyPixelMapper(p);
+						std::cout << "Rotate!" << std::endl;
 						break;
 					default:
 						break;
