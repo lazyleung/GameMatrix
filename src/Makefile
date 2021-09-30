@@ -37,3 +37,9 @@ clean:
 
 FORCE:
 .PHONY: FORCE
+
+install:
+	sudo chmod 777 GameMatrix.app
+	sudo cp GameMatrix.app /usr/sbin/
+	sudo chmod 777 GameMatrix.service
+	sudo cp GameMatrix.service /usr/lib/systemd/system/
