@@ -60,6 +60,12 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 
     if (inputs[AButton] && !prevInputs[AButton])
     {
+        for (int i = 0; i < TOTAL_INPUTS; i++)
+        {
+            prevInputs[i] = inputs[i];
+            inputs[i] = false;
+        }
+        
         return selectedOption;
     }
 
