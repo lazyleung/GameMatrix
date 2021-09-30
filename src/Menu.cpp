@@ -16,12 +16,12 @@ const int letter_spacing = 0;
 
 void Menu::upOption()
 {
-    selectedOption = (selectedOption == TetrisMenuOption) ? RestartMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)-1);
+    selectedOption = (selectedOption == TetrisMenuOption) ? RotateMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)-1);
 }
 
 void Menu::downOption()
 {
-    selectedOption = (selectedOption == RestartMenuOption) ? TetrisMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)+1);
+    selectedOption = (selectedOption == RotateMenuOption) ? TetrisMenuOption : static_cast<MenuOptions>(static_cast<int>(selectedOption)+1);
 }
 
 Menu::Menu()
@@ -93,13 +93,15 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
             case TetrisMenuOption:
                 text = "Tetris";
                 break;
-            case PokemonMenuOption:
-                text = "Pokemon";
+            case AnimationMenuOption:
+                text = "Animate";
                 break;
-            case RestartMenuOption:
-                text = "Restart";
+            case ClockMenuOption:
+                text = "Clock";
                 break;
-            
+            case RotateMenuOption:
+                text = "Rotate";
+                break;
             default:
                 break;
         }

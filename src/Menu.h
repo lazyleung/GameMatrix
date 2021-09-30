@@ -6,13 +6,14 @@
 #include "led-matrix.h"
 
 #define FONT_FILE "./8bit.bdf"
-#define MENU_OPTIONS_COUNT 3
+#define MENU_OPTIONS_COUNT 4
 
 enum MenuOptions
 {
     TetrisMenuOption,
-    PokemonMenuOption,
-    RestartMenuOption
+    AnimationMenuOption,
+    ClockMenuOption,
+    RotateMenuOption
 };
 
 #endif

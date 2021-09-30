@@ -3,10 +3,10 @@
 #include "Inputs.h"
 #include "Menu.h"
 
-#include "Audio/AlsaInput.h"
-#include "Audio/WaveletBpmDetector.h"
-#include "Audio/sliding_median.h"
-#include "Audio/FFTData.h"
+// #include "Audio/AlsaInput.h"
+// #include "Audio/WaveletBpmDetector.h"
+// #include "Audio/SlidingMedian.h"
+// #include "Audio/FFTData.h"
 
 #include "pixel-mapper.h"
 #include "graphics.h"
@@ -29,7 +29,8 @@ using rgb_matrix::Canvas;
 enum MatrixMode {
 	MenuMode,
 	TetrisMode,
-	PokemonMode
+	AnimationMode,
+	ClockMode
 };
 static MatrixMode matrixMode;
 
@@ -192,6 +193,8 @@ int main(int argc, char *argv[])
 			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
 	}
 
+	 
+
 	// Init Engine Resources
 	// std::shared_ptr<ThreadSync> sync = std::make_shared<ThreadSync>();
 	// std::shared_ptr<AlsaInput> audio = std::make_shared<AlsaInput>(interrupt_received, sync);
@@ -249,10 +252,13 @@ int main(int argc, char *argv[])
 					case TetrisMenuOption:
 						matrixMode = TetrisMode;
 						break;
-					case PokemonMenuOption:
-						matrixMode = PokemonMode;
+					case AnimationMenuOption:
+						matrixMode = AnimationMode;
 						break;
-					case RestartMenuOption:
+					case ClockMenuOption:
+						break;
+					case RotateMenuOption:
+						matrix->ApplyPixelMapper(FindPixelMapper("U-Mapper", 4, 1, "Rotate:90"));
 						_running = false;
 						break;
 					default:
@@ -266,8 +272,10 @@ int main(int argc, char *argv[])
 				}
 				t->DrawTetris(matrix);
 				break;
-			case PokemonMode:
+			case AnimationMode:
 
+				break;
+			case ClockMode:
 				break;
 			default:
 				break;
