@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
     unsigned int last_written = 0;
 	int64_t windowSize = 131072;
 	std::vector<Sample> values = std::vector<Sample>(windowSize);
-	std::vector<float> data;
+	std::vector<float> data = std::vector<float>(windowSize);
 	std::shared_ptr<FreqData> freq =  std::make_shared<FreqData>(2048, audio->get_rate());
 	WaveletBPMDetector detector = WaveletBPMDetector(12, windowSize, freq);
 	CircularBuffer<float> amps = CircularBuffer<float>(windowSize * 2);
