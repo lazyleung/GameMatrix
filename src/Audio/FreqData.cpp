@@ -1,4 +1,4 @@
-#include "freq_data.h"
+#include "FreqData.h"
 
 #include <cmath>
 

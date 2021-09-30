@@ -1,8 +1,8 @@
 #ifndef _waveletbpmdetector
 #define _waveletbpmdetector
 
-#include "freq_data.h"
-#include "wavelet.h"
+#include "FreqData.h"
+#include "Wavelet.h"
 
 #include <fftw3.h>
 #include <memory>

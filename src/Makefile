@@ -1,6 +1,7 @@
 CFLAGS=-Wall -O3 -g -Wextra -Wno-unused-parameter
 CXXFLAGS=$(CFLAGS)
-OBJECTS=GameMatrix.o Tetris.o Menu.o ThreadSync.o AudioInput.o AlsaInput.o WaveletBpmDetector.o wavelet.o freq_data.o
+OBJECTS=GameMatrix.o Tetris.o Menu.o
+# ThreadSync.o AudioInput.o AlsaInput.o WaveletBpmDetector.o wavelet.o freq_data.o 
 BINARIES=GameMatrix.app
 
 # Where our library resides. You mostly only need to change the
