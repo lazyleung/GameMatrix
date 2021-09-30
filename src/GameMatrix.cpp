@@ -259,7 +259,6 @@ int main(int argc, char *argv[])
 						break;
 					case RotateMenuOption:
 						matrix->ApplyPixelMapper(FindPixelMapper("U-Mapper", 4, 1, "Rotate:90"));
-						_running = false;
 						break;
 					default:
 						break;
