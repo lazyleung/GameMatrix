@@ -153,7 +153,7 @@ static void getArcadeInput()
 
 int main(int argc, char *argv[]) 
 {
-	matrixMode = MenuMode;
+	matrixMode = ClockMode;
 
 	RGBMatrix::Options defaults;
 	defaults.hardware_mapping = "adafruit-hat-pwm";
@@ -192,8 +192,6 @@ int main(int argc, char *argv[])
 			pinMode(GPIO_OFFSET + i, INPUT);
 			pullUpDnControl(GPIO_OFFSET + i, PUD_UP);
 	}
-
-	 
 
 	// Init Engine Resources
 	// std::shared_ptr<ThreadSync> sync = std::make_shared<ThreadSync>();

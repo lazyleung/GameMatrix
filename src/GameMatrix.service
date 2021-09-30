@@ -1,0 +1,9 @@
+[Unit]
+Description=GameMatrix
+
+[Service]
+ExecStart=/usr/sbin/GameMatrix.app
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5
+TimeoutSec=5
