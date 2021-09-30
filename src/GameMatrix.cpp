@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 	int64_t last_read = 0;
     unsigned int last_written = 0;
 	int64_t windowSize = 131072;
-	std::vector<Sample> values;
+	std::vector<Sample> values = std::vector<Sample>(windowSize);
 	std::vector<float> data;
 	std::shared_ptr<FreqData> freq =  std::make_shared<FreqData>(2048, audio->get_rate());
 	WaveletBPMDetector detector = WaveletBPMDetector(12, windowSize, freq);
