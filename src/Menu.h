@@ -32,6 +32,7 @@ class Menu
         ~Menu();
 
         void Reset();
-        int Loop(RGBMatrix *canvas, volatile bool *inputs);
+        int Loop(RGBMatrix *matrix, volatile bool *inputs);
+        int ClockLoop(RGBMatrix *matrix, volatile bool *inputs);
         int TestLoop(RGBMatrix *matrix, volatile bool *inputs, const char* text);
 };

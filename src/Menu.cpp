@@ -4,6 +4,8 @@
 #include "led-matrix.h"
 #include "graphics.h"
 
+#include <ctime>
+
 using namespace rgb_matrix;
 
 const int x_orig = 11;
@@ -115,6 +117,58 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     }
 
     rgb_matrix::DrawCircle(matrix, x_orig - x_marker_shift, y_orig - y_marker_shift + selectedOption*y_scale, marker_radius, color);
+
+    return -1;
+}
+
+int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
+{
+    // Proccess inputs on button down
+    if (inputs[UpStick] && !prevInputs[UpStick])
+    {
+        // Change clock styles
+    }
+    
+    if (inputs[AButton] && !prevInputs[AButton])
+    {
+        for (int i = 0; i < TOTAL_INPUTS; i++)
+        {
+            prevInputs[i] = inputs[i];
+            inputs[i] = false;
+        }
+        
+        return selectedOption;
+    }
+
+    for (int i = 0; i < TOTAL_INPUTS; i++)
+    {
+        prevInputs[i] = inputs[i];
+        inputs[i] = false;
+    }
+
+    // Draw Menu
+    Color color(255, 255, 0);
+    Color bg_color(0, 0, 0);
+    Color flood_color(0, 0, 0);
+    
+    // Load font
+    rgb_matrix::Font font;
+    if (!font.LoadFont(FONT_FILE)) {
+        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
+        return -1;
+    }
+
+    // Clean background
+    matrix->Fill(flood_color.r, flood_color.g, flood_color.b);
+
+    time_t now = time(0);
+    char* dt = ctime(&now);
+
+
+    // Draw Text
+    // const char* text;
+    rgb_matrix::DrawText(matrix, font, 10, 32, color, &bg_color, dt, letter_spacing);
+
 
     return -1;
 }

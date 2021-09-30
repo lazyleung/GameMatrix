@@ -273,6 +273,10 @@ int main(int argc, char *argv[])
 
 				break;
 			case ClockMode:
+				if(m->ClockLoop(matrix, inputs) == -1)
+				{
+					matrixMode = MenuMode;
+				}
 				break;
 			default:
 				break;
