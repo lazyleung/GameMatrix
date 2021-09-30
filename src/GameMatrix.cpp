@@ -254,6 +254,7 @@ int main(int argc, char *argv[])
 						matrixMode = AnimationMode;
 						break;
 					case ClockMenuOption:
+						matrixMode = ClockMode;
 						break;
 					case RotateMenuOption:
 						matrix->ApplyPixelMapper(FindPixelMapper("Rotate", 4, 1, "90"));
