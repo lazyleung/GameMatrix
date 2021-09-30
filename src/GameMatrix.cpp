@@ -4,6 +4,7 @@
 #include "Menu.h"
 #include "AlsaInput.h"
 #include "WaveletBpmDetector.h"
+#include "sliding_median.h"
 
 #include "pixel-mapper.h"
 #include "graphics.h"
@@ -203,7 +204,7 @@ int main(int argc, char *argv[])
 
 	using Timestamp = std::chrono::steady_clock::time_point;
     using Duration = std::chrono::steady_clock::duration;
-	//SlidingMedian<float, Timestamp, Duration> slide = SlidingMedian(std::chrono::seconds(5));
+	SlidingMedian<float, Timestamp, Duration> slide = SlidingMedian<float, Timestamp, Duration>(std::chrono::seconds(5));
 
 	Menu *m = new Menu();
 	Tetris *t  = new Tetris();
@@ -291,11 +292,11 @@ int main(int argc, char *argv[])
 						amps.read(data.data(), windowSize);
 
 						float bpm = detector.computeWindowBpm(data);
-						//bpm = slide.offer(std::make_pair(bpm, std::chrono::steady_clock::now()));
+						bpm = slide.offer(std::make_pair(bpm, std::chrono::steady_clock::now()));
 						// if (!global->lock_bpm) {
 						// 	global->bpm = bpm;
 						// }
-						// std::cout << "Window BPM: " << bpm << std::endl << std::flush;
+						std::cout << "Window BPM: " << bpm << std::endl << std::flush;
 						if (m->TestLoop(matrix, inputs, std::to_string(bpm).c_str()) == -1)
 						{
 							matrixMode = MenuMode;

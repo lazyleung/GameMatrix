@@ -1,5 +1,5 @@
 #ifndef _sample
-#define sample
+#define _sample
 
 #include <complex>
 
