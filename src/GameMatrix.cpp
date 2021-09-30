@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
 					case ClockMenuOption:
 						break;
 					case RotateMenuOption:
-						matrix->ApplyPixelMapper(FindPixelMapper("Rotate", 4, 1, "Rotate:90"));
+						matrix->ApplyPixelMapper(FindPixelMapper("Rotate", 4, 1, "90"));
 						break;
 					default:
 						break;
