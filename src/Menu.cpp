@@ -162,12 +162,15 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     matrix->Fill(flood_color.r, flood_color.g, flood_color.b);
 
     time_t now = time(0);
-    char* dt = ctime(&now);
-
+    //char* dt = ctime(&now);
+    tm *ltm = localtime(&now);
 
     // Draw Text
-    // const char* text;
-    rgb_matrix::DrawText(matrix, font, 10, 32, color, &bg_color, dt, letter_spacing);
+    char buf[10];
+    strftime(buf, 10, "%I:%M:%S", ltm);
+
+    //const char* text = "Time: " + (5 + ltm->tm_hour) + ":" + (30 + ltm->tm_min) + ":" + ltm->tm_sec;
+    rgb_matrix::DrawText(matrix, font, 10, 32, color, &bg_color, buf, letter_spacing);
 
     return 0;
 }
