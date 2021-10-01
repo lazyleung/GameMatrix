@@ -161,9 +161,9 @@ int dx1, dy1, dx2, dy2;
 int plasmaCount;
 int plasmaCountTarget;
 bool prevInputs[TOTAL_INPUTS];
-Color palette[256];
-Color palette1[256];
-Color palette2[256];
+Color *palette;
+Color *palette1;
+Color *palette2;
 bool prevPaletteDirection;
 
 double distance(double x, double y)
@@ -225,6 +225,10 @@ void InitPlasma()
 
 	uint64_t plasmaCount = 0;
 	plasmaCountTarget = PLASMA_BASE_COUNT;
+
+	palette = (Color*)malloc(256 * sizeof(Color));
+	palette1 = (Color*)malloc(256 * sizeof(Color));
+	palette2 = (Color*)malloc(256 * sizeof(Color));
 
 	makeRandomPalette(palette);
 	makeRandomPalette(palette1);
@@ -496,6 +500,10 @@ int main(int argc, char *argv[])
 	}
 
 	interrupt_received = true;
+
+	free(palette);
+	free(palette1);
+	free(palette2);
 
 	if (isKB)
 	{
