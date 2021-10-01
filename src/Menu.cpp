@@ -193,7 +193,7 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     if (isShowSeconds)
     {
         strftime(buf, 10, "%S", ltm);
-        rgb_matrix::DrawText(matrix, font, 41 + clockXShift, 50 + clockYShift, color, &bg_color, buf, letter_spacing);
+        rgb_matrix::DrawText(matrix, font, 32 + clockXShift, 48 + clockYShift, color, &bg_color, buf, letter_spacing);
     }
 
     return 0;
