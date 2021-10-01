@@ -5,7 +5,8 @@
 
 #include "led-matrix.h"
 
-#define FONT_FILE "./8bit.bdf"
+#define FONT_FILE_8BIT "/usr/font/8bit.bdf"
+#define FONT_FILE_CLOCK "/usr/font/9x18.bdf"
 #define MENU_OPTIONS_COUNT 4
 
 enum MenuOptions
