@@ -161,9 +161,9 @@ int dx1, dy1, dx2, dy2;
 int plasmaCount;
 int plasmaCountTarget;
 bool prevInputs[TOTAL_INPUTS];
-Color palette[255];
-Color palette1[255];
-Color palette2[255];
+Color palette[256];
+Color palette1[256];
+Color palette2[256];
 bool prevPaletteDirection;
 
 double distance(double x, double y)
