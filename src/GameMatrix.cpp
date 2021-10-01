@@ -345,6 +345,11 @@ int PlasmaLoop(RGBMatrix* matrix, volatile bool *inputs)
 
 			int h = heightMap1[i] + heightMap2[k];
 
+			if ( h > 255 )
+			{
+				h = 255;
+			}
+
 			canvas->SetPixel(u, v, palette[h].r, palette[h].g, palette[h].b);
 		}
 	}
