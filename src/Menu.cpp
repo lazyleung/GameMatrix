@@ -169,7 +169,7 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
         inputs[i] = false;
     }
 
-    Color color(100, 100, 100);
+    Color color(150, 150, 150);
     Color bg_color(0, 0, 0);
     Color flood_color(0, 0, 0);
     
