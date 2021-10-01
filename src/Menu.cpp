@@ -189,11 +189,11 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     // Draw Text
     char buf[10];
     strftime(buf, 10, "%I:%M", ltm);
-    rgb_matrix::DrawText(matrix, font, 10 + clockXShift, 32 + clockYShift, color, &bg_color, buf, letter_spacing);
+    rgb_matrix::DrawText(matrix, font, 10 + clockXShift, 29 + clockYShift, color, &bg_color, buf, letter_spacing);
     if (isShowSeconds)
     {
         strftime(buf, 10, "%S", ltm);
-        rgb_matrix::DrawText(matrix, font, 24 + clockXShift, 48 + clockYShift, color, &bg_color, buf, letter_spacing);
+        rgb_matrix::DrawText(matrix, font, 24 + clockXShift, 45 + clockYShift, color, &bg_color, buf, letter_spacing);
     }
 
     return 0;
