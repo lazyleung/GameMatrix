@@ -171,29 +171,29 @@ double distance(double x, double y)
 	return sqrt(x * x + y * y);
 }
 
-void interpolate(Color* c, Color* c1, Color* c2, double f)
+void interpolate(Color* c, Color c1, Color c2, double f)
 {
-	c->r = floor(c1->r + (c2->r - c1->r) * f);
-	c->g = floor(c1->g + (c2->g - c1->g) * f);
-	c->b = floor(c1->b + (c2->b - c1->b) * f);
+	c->r = floor(c1.r + (c2.r - c1.r) * f);
+	c->g = floor(c1.g + (c2.g - c1.g) * f);
+	c->b = floor(c1.b + (c2.b - c1.b) * f);
 }
 
-Color* randomColor()
+Color randomColor()
 {
-	Color *c = new Color();
-	c->r = floor(rand() * 255);
-	c->g = floor(rand() * 255);
-	c->b = floor(rand() * 255);
+	Color c;
+	c.r = floor(rand() * 255);
+	c.g = floor(rand() * 255);
+	c.b = floor(rand() * 255);
 	return c;
 }
 
 void makeRandomPalette(Color *palette)
 {
-	Color *c1 = randomColor();
-	Color *c2 = randomColor();
-	Color *c3 = randomColor();
-	Color *c4 = randomColor();
-	Color *c5 = randomColor();
+	Color c1 = randomColor();
+	Color c2 = randomColor();
+	Color c3 = randomColor();
+	Color c4 = randomColor();
+	Color c5 = randomColor();
 
 	 for (int i = 0; i < 64; i++) {
         double f = i / 64;
@@ -335,7 +335,7 @@ int PlasmaLoop(RGBMatrix* matrix, volatile bool *inputs)
 
 	// create interpolated palette for current frame
 	for (int i = 0; i < 256; i++) {
-		interpolate(&palette[i], &palette1[i], &palette2[i], inter);
+		interpolate(&palette[i], palette1[i], palette2[i], inter);
 	}
 
 	FrameCanvas *canvas = matrix->CreateFrameCanvas();
