@@ -28,8 +28,7 @@ void Menu::downOption()
 
 Menu::Menu()
 {
-    colorMultiplier = 1;
-    colorCount = 0;
+    isShowSeconds = true;
     Reset(); 
 }
 
@@ -52,17 +51,12 @@ void Menu::Reset()
 int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 {
     // Proccess inputs on button down
-    if (inputs[UpStick] && !prevInputs[UpStick])
+    if (inputs[AButton] && !prevInputs[AButton])
     {
-        upOption();
-    }
-    
-    if (inputs[DownStick] && !prevInputs[DownStick])
-    {
-        downOption();
+        isShowSeconds = !isShowSeconds;
     }
 
-    if (inputs[AButton] && !prevInputs[AButton])
+    if (inputs[MenuButton] && !prevInputs[MenuButton])
     {
         for (int i = 0; i < TOTAL_INPUTS; i++)
         {
@@ -156,17 +150,9 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
         inputs[i] = false;
     }
 
-    // Draw Menu
+    Color color(100, 100, 100);
     Color bg_color(0, 0, 0);
     Color flood_color(0, 0, 0);
-
-    // Draw clear line animation
-    uint shift = colorCount * colorMultiplier * 0.2;
-    if (shift > 255)
-    {
-        shift = 0;
-    }
-    Color color(255 - shift, 255 - shift,  255 - shift);
     
     // Load font
     rgb_matrix::Font font;
@@ -185,6 +171,11 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     char buf[10];
     strftime(buf, 10, "%I:%M", ltm);
     rgb_matrix::DrawText(matrix, font, 10, 32, color, &bg_color, buf, letter_spacing);
+    if (isShowSeconds)
+    {
+        strftime(buf, 10, "%S", ltm);
+        rgb_matrix::DrawText(matrix, font, 41, 50, color, &bg_color, buf, letter_spacing);
+    }
 
     return 0;
 }

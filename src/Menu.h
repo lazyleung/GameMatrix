@@ -28,8 +28,7 @@ class Menu
         bool prevInputs[TOTAL_INPUTS];
         void upOption();
         void downOption();
-        int colorCount;
-        int colorMultiplier;
+        bool isShowSeconds;
     public:
         Menu();
         ~Menu();
