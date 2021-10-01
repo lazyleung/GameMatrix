@@ -28,6 +28,8 @@ void Menu::downOption()
 
 Menu::Menu()
 {
+    colorMultiplier = 1;
+    colorCount = 0;
     Reset(); 
 }
 
@@ -126,7 +128,15 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     // Proccess inputs on button down
     if (inputs[UpStick] && !prevInputs[UpStick])
     {
-        // Change clock styles
+        colorMultiplier++;
+    }
+
+    if (inputs[DownStick] && !prevInputs[DownStick])
+    {
+        if (colorMultiplier > 0)
+        {
+            colorMultiplier--;
+        }
     }
     
     if (inputs[MenuButton] && !prevInputs[MenuButton])
@@ -147,9 +157,16 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     }
 
     // Draw Menu
-    Color color(255, 255, 0);
     Color bg_color(0, 0, 0);
     Color flood_color(0, 0, 0);
+
+    // Draw clear line animation
+    uint shift = colorCount * colorMultiplier * 0.2;
+    if (shift > 255)
+    {
+        shift = 0;
+    }
+    Color color(255 - shift, 255 - shift,  255 - shift);
     
     // Load font
     rgb_matrix::Font font;

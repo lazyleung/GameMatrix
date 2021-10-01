@@ -360,7 +360,7 @@ int PlasmaLoop(RGBMatrix* matrix, volatile bool *inputs)
 
 int main(int argc, char *argv[]) 
 {
-	matrixMode = AnimationMode;
+	matrixMode = ClockMode;
 
 	RGBMatrix::Options defaults;
 	defaults.hardware_mapping = "adafruit-hat-pwm";
@@ -459,7 +459,7 @@ int main(int argc, char *argv[])
 						matrixMode = TetrisMode;
 						break;
 					case AnimationMenuOption:
-						matrixMode = AnimationMode;
+						// matrixMode = AnimationMode;
 						break;
 					case ClockMenuOption:
 						matrixMode = ClockMode;
