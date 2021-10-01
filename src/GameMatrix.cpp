@@ -226,6 +226,7 @@ void InitPlasma()
 	uint64_t plasmaCount = 0;
 	plasmaCountTarget = PLASMA_BASE_COUNT;
 
+	makeRandomPalette(palette);
 	makeRandomPalette(palette1);
 	makeRandomPalette(palette2);
 
