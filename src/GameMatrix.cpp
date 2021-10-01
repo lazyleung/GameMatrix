@@ -413,6 +413,7 @@ int main(int argc, char *argv[])
 
 	Menu *m = new Menu();
 	Tetris *t  = new Tetris();
+	InitPlasma();
 
 	// Enabel KB mode if specified  by cmdline arg
 	isKB = false;
