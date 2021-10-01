@@ -84,8 +84,8 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
     
     // Load font
     rgb_matrix::Font font;
-    if (!font.LoadFont(FONT_FILE)) {
-        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
+    if (!font.LoadFont(FONT_FILE_8BIT)) {
+        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE_8BIT);
         return -1;
     }
 
@@ -153,8 +153,8 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     
     // Load font
     rgb_matrix::Font font;
-    if (!font.LoadFont(FONT_FILE)) {
-        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
+    if (!font.LoadFont(FONT_FILE_CLOCK)) {
+        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE_CLOCK);
         return -1;
     }
 
