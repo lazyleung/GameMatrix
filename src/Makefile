@@ -43,6 +43,6 @@ install:
 	sudo cp GameMatrix.app /usr/sbin/
 	sudo chmod 777 GameMatrix.service
 	sudo cp GameMatrix.service /usr/lib/systemd/system/
-	sudo mkdir /usr/font/
+	sudo mkdir -p /usr/font/
 	sudo cp 8bit.bdf /usr/font/8bit.bdf
 	sudo cp 9x18.bdf /usr/font/9x18.bdf
