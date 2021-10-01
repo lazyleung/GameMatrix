@@ -7,12 +7,12 @@
 
 #define FONT_FILE_8BIT "/usr/font/8bit.bdf"
 #define FONT_FILE_CLOCK "/usr/font/9x18.bdf"
-#define MENU_OPTIONS_COUNT 4
+#define MENU_OPTIONS_COUNT 3
 
 enum MenuOptions
 {
     TetrisMenuOption,
-    AnimationMenuOption,
+    //AnimationMenuOption,
     ClockMenuOption,
     RotateMenuOption
 };
@@ -29,6 +29,8 @@ class Menu
         void upOption();
         void downOption();
         bool isShowSeconds;
+        int clockXShift;
+        int clockYShift;
     public:
         Menu();
         ~Menu();

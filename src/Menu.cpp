@@ -28,6 +28,8 @@ void Menu::downOption()
 
 Menu::Menu()
 {
+    clockXShift = 0;
+    clockYShift = 0;
     isShowSeconds = true;
     Reset(); 
 }
@@ -51,12 +53,17 @@ void Menu::Reset()
 int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
 {
     // Proccess inputs on button down
-    if (inputs[AButton] && !prevInputs[AButton])
+    if (inputs[UpStick] && !prevInputs[UpStick])
     {
-        isShowSeconds = !isShowSeconds;
+        upOption();
+    }
+    
+    if (inputs[DownStick] && !prevInputs[DownStick])
+    {
+        downOption();
     }
 
-    if (inputs[MenuButton] && !prevInputs[MenuButton])
+    if (inputs[AButton] && !prevInputs[AButton])
     {
         for (int i = 0; i < TOTAL_INPUTS; i++)
         {
@@ -97,9 +104,9 @@ int Menu::Loop(RGBMatrix *matrix, volatile bool *inputs)
             case TetrisMenuOption:
                 text = "Tetris";
                 break;
-            case AnimationMenuOption:
-                text = "Animate";
-                break;
+            // case AnimationMenuOption:
+            //     text = "Animate";
+            //     break;
             case ClockMenuOption:
                 text = "Clock";
                 break;
@@ -122,15 +129,27 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     // Proccess inputs on button down
     if (inputs[UpStick] && !prevInputs[UpStick])
     {
-        colorMultiplier++;
+        clockYShift--;
     }
 
     if (inputs[DownStick] && !prevInputs[DownStick])
     {
-        if (colorMultiplier > 0)
-        {
-            colorMultiplier--;
-        }
+        clockYShift++;
+    }
+
+    if (inputs[LeftStick] && !prevInputs[LeftStick])
+    {
+        clockXShift--;
+    }
+
+    if (inputs[RightStick] && !prevInputs[RightStick])
+    {
+        clockXShift++;
+    }
+
+    if (inputs[AButton] && !prevInputs[AButton])
+    {
+        isShowSeconds = !isShowSeconds;
     }
     
     if (inputs[MenuButton] && !prevInputs[MenuButton])
@@ -170,11 +189,11 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     // Draw Text
     char buf[10];
     strftime(buf, 10, "%I:%M", ltm);
-    rgb_matrix::DrawText(matrix, font, 10, 32, color, &bg_color, buf, letter_spacing);
+    rgb_matrix::DrawText(matrix, font, 10 + clockXShift, 32 + clockYShift, color, &bg_color, buf, letter_spacing);
     if (isShowSeconds)
     {
         strftime(buf, 10, "%S", ltm);
-        rgb_matrix::DrawText(matrix, font, 41, 50, color, &bg_color, buf, letter_spacing);
+        rgb_matrix::DrawText(matrix, font, 41 + clockXShift, 50 + clockYShift, color, &bg_color, buf, letter_spacing);
     }
 
     return 0;

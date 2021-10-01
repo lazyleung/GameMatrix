@@ -32,7 +32,7 @@ using rgb_matrix::Canvas;
 enum MatrixMode {
 	MenuMode,
 	TetrisMode,
-	AnimationMode,
+	//AnimationMode,
 	ClockMode
 };
 static MatrixMode matrixMode;
@@ -458,9 +458,9 @@ int main(int argc, char *argv[])
 					case TetrisMenuOption:
 						matrixMode = TetrisMode;
 						break;
-					case AnimationMenuOption:
-						// matrixMode = AnimationMode;
-						break;
+					// case AnimationMenuOption:
+					// 	// matrixMode = AnimationMode;
+					// 	break;
 					case ClockMenuOption:
 						matrixMode = ClockMode;
 						break;
@@ -478,12 +478,12 @@ int main(int argc, char *argv[])
 				}
 				t->DrawTetris(matrix);
 				break;
-			case AnimationMode:
-				if (PlasmaLoop(matrix, inputs) == -1)
-				{
-					matrixMode = MenuMode;
-				}
-				break;
+			// case AnimationMode:
+			// 	if (PlasmaLoop(matrix, inputs) == -1)
+			// 	{
+			// 		matrixMode = MenuMode;
+			// 	}
+			// 	break;
 			case ClockMode:
 				if(m->ClockLoop(matrix, inputs) == -1)
 				{
