@@ -129,7 +129,7 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
         // Change clock styles
     }
     
-    if (inputs[AButton] && !prevInputs[AButton])
+    if (inputs[MenuButton] && !prevInputs[MenuButton])
     {
         for (int i = 0; i < TOTAL_INPUTS; i++)
         {
@@ -162,14 +162,11 @@ int Menu::ClockLoop(RGBMatrix *matrix, volatile bool *inputs)
     matrix->Fill(flood_color.r, flood_color.g, flood_color.b);
 
     time_t now = time(0);
-    //char* dt = ctime(&now);
     tm *ltm = localtime(&now);
 
     // Draw Text
     char buf[10];
-    strftime(buf, 10, "%I:%M:%S", ltm);
-
-    //const char* text = "Time: " + (5 + ltm->tm_hour) + ":" + (30 + ltm->tm_min) + ":" + ltm->tm_sec;
+    strftime(buf, 10, "%I:%M", ltm);
     rgb_matrix::DrawText(matrix, font, 10, 32, color, &bg_color, buf, letter_spacing);
 
     return 0;

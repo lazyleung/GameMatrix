@@ -151,6 +151,37 @@ static void getArcadeInput()
 	}
 }
 
+int PlasmaLoop(RGBMatrix* matrix, volatile bool *inputs)
+{
+	// Proccess inputs on button down
+    if (inputs[UpStick] && !prevInputs[UpStick])
+    {
+        // Change speed
+    }
+
+	if (inputs[DownStick] && !prevInputs[DownStick])
+    {
+        // Change speed
+    }
+    
+    if (inputs[MenuButton] && !prevInputs[MenuButton])
+    {
+        for (int i = 0; i < TOTAL_INPUTS; i++)
+        {
+            prevInputs[i] = inputs[i];
+            inputs[i] = false;
+        }
+        
+        return -1;
+    }
+
+    for (int i = 0; i < TOTAL_INPUTS; i++)
+    {
+        prevInputs[i] = inputs[i];
+        inputs[i] = false;
+    }
+}
+
 int main(int argc, char *argv[]) 
 {
 	matrixMode = ClockMode;
@@ -271,7 +302,10 @@ int main(int argc, char *argv[])
 				t->DrawTetris(matrix);
 				break;
 			case AnimationMode:
-
+				if (PlasmaLoop(matrix, inputs) == -1)
+				{
+					matrixMode = MenuMode;
+				}
 				break;
 			case ClockMode:
 				if(m->ClockLoop(matrix, inputs) == -1)
