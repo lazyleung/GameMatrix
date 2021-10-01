@@ -22,6 +22,9 @@
 #include <wiringPi.h>
 #include <mcp23017.h>
 
+#define PI 3.14159265
+#define PLASMA_BASE_COUNT 30
+
 using namespace rgb_matrix;
 using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
@@ -151,6 +154,127 @@ static void getArcadeInput()
 	}
 }
 
+const int mapSize = 64;
+int heightMap1[mapSize * mapSize];
+int heightMap2[mapSize * mapSize];
+int dx1, dy1, dx2, dy2;
+int plasmaCount;
+int plasmaCountTarget;
+bool prevInputs[TOTAL_INPUTS];
+Color palette[256];
+Color palette1[256];
+Color palette2[256];
+bool prevPaletteDirection;
+
+double distance(double x, double y)
+{
+	return sqrt(x * x + y * y);
+}
+
+void interpolate(Color* c, Color* c1, Color* c2, double f)
+{
+	c->r = floor(c1->r + (c2->r - c1->r) * f);
+	c->g = floor(c1->g + (c2->g - c1->g) * f);
+	c->b = floor(c1->b + (c2->b - c1->b) * f);
+}
+
+Color* randomColor()
+{
+	Color *c = new Color();
+	c->r = floor(rand() * 255);
+	c->g = floor(rand() * 255);
+	c->b = floor(rand() * 255);
+	return c;
+}
+
+void makeRandomPalette(Color *palette)
+{
+	Color *c1 = randomColor();
+	Color *c2 = randomColor();
+	Color *c3 = randomColor();
+	Color *c4 = randomColor();
+	Color *c5 = randomColor();
+
+	 for (int i = 0; i < 64; i++) {
+        double f = i / 64;
+        interpolate(&palette[i], c1, c2, f);
+      }
+
+      for (int i = 64; i < 128; i++) {
+        double f = (i - 64) / 64;
+        interpolate(&palette[i], c2, c3, f);
+      }
+
+      for (int i = 128; i < 192; i++) {
+        double f = (i - 128) / 64;
+        interpolate(&palette[i], c3, c4, f);
+      }
+
+      for (int i = 192; i < 256; i++) {
+        double f = (i - 192) / 64;
+        interpolate(&palette[i], c4, c5, f);
+      }
+}
+
+void InitPlasma()
+{
+	dx1 = 0;
+	dy1 = 0;
+	dx2 = 0;
+	dy2 = 0;
+
+	uint64_t plasmaCount = 0;
+	plasmaCountTarget = PLASMA_BASE_COUNT;
+
+	makeRandomPalette(palette1);
+	makeRandomPalette(palette2);
+
+	prevPaletteDirection = true;
+
+	for (int u = 0; u < mapSize; u++)
+	{
+		for (int v = 0; v < mapSize; v++)
+		{
+			int i = u * mapSize + v;
+
+			double cx = u - mapSize / 2;
+			double cy = v - mapSize / 2;
+
+			double d = distance(cx, cy);
+
+			double stretch = (3 * PI) / (mapSize / 2);
+
+			double ripple = sin(d * stretch);
+
+			double normalized = (ripple + 1) / 2;
+
+			heightMap1[i] = floor(normalized * 128);
+		}
+	}
+
+	for (int u = 0; u < mapSize; u++)
+	{
+		for (int v = 0; v < mapSize; v++)
+		{
+			int i = u * mapSize + v;
+
+			double cx = u - mapSize / 2;
+			double cy = v - mapSize / 2;
+
+			double d1 = distance(0.8 * cx, 1.3 * cy) * 0.022;
+        	double d2 = distance(1.35 * cx, 0.45 * cy) * 0.022;
+
+			double s = sin(d1);
+			double c = sin(d2);
+			double h = s + c;
+
+			double normalized = (h + 2) / 4;
+
+			heightMap2[i] = floor(normalized * 127);
+		}
+	}
+}
+
 int PlasmaLoop(RGBMatrix* matrix, volatile bool *inputs)
 {
 	// Proccess inputs on button down
@@ -180,6 +304,53 @@ int PlasmaLoop(RGBMatrix* matrix, volatile bool *inputs)
         prevInputs[i] = inputs[i];
         inputs[i] = false;
     }
+
+	// Move height map
+	if (plasmaCount++ % plasmaCountTarget == 0)
+	{
+		dx1 = floor((((cos(0.0002 + 0.4 + PI) + 1)/2) * mapSize) / 2);
+		dy1 = floor((((cos(0.0003 - 0.1) + 1) / 2) * mapSize) / 2);
+		dx2 = floor((((cos(-0.0002 + 1.2) + 1) / 2) * mapSize) / 2);
+		dy2 = floor((((cos( -0.0003 - 0.8 + PI) + 1) / 2) * mapSize) / 2);
+	}
+
+	// Update palette
+	double x = plasmaCount * 0.0005;
+	double inter = (cos(x) + 1) / 2;
+
+	bool direction = -sin(x) >= 0;
+	if (prevPaletteDirection != direction) {
+	prevPaletteDirection = direction;
+		if (direction == false) {
+			makeRandomPalette(palette1);
+		} else {
+			makeRandomPalette(palette2);
+		}
+	}
+
+	// create interpolated palette for current frame
+	for (int i = 0; i < 256; i++) {
+		interpolate(&palette[i], &palette1[i], &palette2[i], inter);
+	}
+
+	FrameCanvas *canvas = matrix->CreateFrameCanvas();
+
+	for (int u = 0; u < mapSize; u++)
+	{
+		for (int v = 0; v < mapSize; v++)
+		{
+			int i = (u + dy1) * mapSize + (v + dx1);
+			int k = (u + dy2) * mapSize + (v + dx2);
+
+			int h = heightMap1[i] + heightMap2[k];
+
+			Color c = palette[h];
+			canvas->SetPixel(u, v, c.r, c.g, c.b);
+		}
+	}
+
+	matrix->SwapOnVSync(canvas, 2U);
+	return 0;
 }
 
 int main(int argc, char *argv[]) 
