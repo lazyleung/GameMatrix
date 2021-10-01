@@ -196,8 +196,8 @@ int Menu::TestLoop(RGBMatrix *matrix, volatile bool *inputs, const char* text)
     
     // Load font
     rgb_matrix::Font font;
-    if (!font.LoadFont(FONT_FILE)) {
-        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE);
+    if (!font.LoadFont(FONT_FILE_8BIT)) {
+        fprintf(stderr, "Couldn't load font '%s'\n", FONT_FILE_8BIT);
         return -1;
     }
 
